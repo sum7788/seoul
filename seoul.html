@@ -1,0 +1,539 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>서울 정비사업 탐색기</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --border: #e4e2db;
+    --border2: #ccc9be;
+    --text: #1a1916;
+    --text2: #5c5a54;
+    --text3: #9c9a93;
+    --accent: #2c5f2e;
+    --accent-light: #eaf3de;
+    --font: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  }
+  body { background: var(--bg); font-family: var(--font); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 20px; position: sticky; top: 0; z-index: 100; }
+  .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .logo { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
+  .logo span { color: var(--accent); }
+  .count-badge { background: var(--accent-light); color: var(--accent); font-size: 12px; padding: 2px 8px; border-radius: 99px; font-weight: 600; }
+  .search-wrap { position: relative; }
+  .search-wrap input { width: 100%; padding: 9px 12px 9px 36px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); font-size: 14px; color: var(--text); outline: none; font-family: var(--font); }
+  .search-wrap input:focus { border-color: var(--accent); background: var(--surface); }
+  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 15px; pointer-events: none; }
+
+  /* FILTERS */
+  .filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .filter-group { display: flex; gap: 4px; flex-wrap: wrap; }
+  .filter-sep { width: 1px; background: var(--border); margin: 0 2px; }
+  .pill { padding: 5px 11px; border-radius: 99px; border: 1px solid var(--border); background: var(--surface); font-size: 12px; cursor: pointer; color: var(--text2); transition: all 0.12s; font-family: var(--font); white-space: nowrap; }
+  .pill:hover { border-color: var(--border2); color: var(--text); }
+  .pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .pill.s-done.active { background: #1D9E75; border-color: #1D9E75; }
+  .pill.s-demo.active { background: #E24B4A; border-color: #E24B4A; }
+  .pill.s-wip.active { background: #BA7517; border-color: #BA7517; }
+  .pill.s-plan.active { background: #378ADD; border-color: #378ADD; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0; padding: 0 20px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .tab { padding: 10px 16px; font-size: 13px; cursor: pointer; color: var(--text3); border-bottom: 2px solid transparent; transition: all 0.12s; font-family: var(--font); }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+  .naver-btn { display: inline-flex; align-items: center; gap: 4px; margin-top: 10px; padding: 5px 10px; background: #03C75A; color: white; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; }
+  .naver-btn:hover { background: #02b350; }
+
+  /* MAIN */
+  .main { padding: 16px 20px; max-width: 1100px; margin: 0 auto; }
+  .result-info { font-size: 12px; color: var(--text3); margin-bottom: 12px; }
+
+  /* CARDS */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: border-color 0.12s, box-shadow 0.12s; }
+  .card:hover { border-color: var(--border2); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+  .card-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; flex: 1; }
+  .card-sub { font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+  .card-addr { font-size: 11px; color: var(--text3); margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag { font-size: 11px; padding: 2px 7px; border-radius: 4px; background: var(--bg); color: var(--text2); border: 1px solid var(--border); }
+  .badge { font-size: 10px; padding: 2px 7px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; font-weight: 600; }
+  .b-done { background: #eaf3de; color: #1D9E75; }
+  .b-demo { background: #fcebeb; color: #E24B4A; }
+  .b-wip  { background: #faeeda; color: #BA7517; }
+  .b-plan { background: #e6f1fb; color: #378ADD; }
+  .district-tag { font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 500; }
+  .d-CBD시청 { background: #EEEDFE; color: #534AB7; }
+  .d-CBD종로 { background: #DDD8FD; color: #3B318F; }
+  .d-CBD을지로 { background: #FAEEDA; color: #854F0B; }
+  .d-YBD { background: #FBEAF0; color: #993556; }
+  .d-마포 { background: #E1F5EE; color: #0F6E56; }
+  .d-용산 { background: #FAECE7; color: #993C1D; }
+  .d-노량진 { background: #EAF3DE; color: #3B6D11; }
+  .d-흑석 { background: #F1EFE8; color: #5F5E5A; }
+  .d-한남 { background: #FCEBEB; color: #A32D2D; }
+  .d-강남 { background: #E6F1FB; color: #185FA5; }
+  .d-성수 { background: #FBEAF0; color: #72243E; }
+  .d-기타 { background: #F1EFE8; color: #5F5E5A; }
+  .cat-주거 { font-size: 13px; }
+  .cat-상업 { font-size: 13px; }
+  .phase-badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; background: #f0edf8; color: #534AB7; font-weight: 600; border: 1px solid #d8d3f5; white-space: nowrap; }
+  .year-tag { font-size: 10px; padding: 2px 7px; border-radius: 4px; background: #f5f0ff; color: #6B3FA0; border: 1px solid #ddd5f5; font-weight: 600; white-space: nowrap; }
+
+  /* MAP - 네이버 지도 버튼 */
+
+  /* EMPTY */
+  .empty { text-align: center; padding: 4rem 2rem; color: var(--text3); }
+  .empty-icon { font-size: 36px; margin-bottom: 12px; }
+
+  /* DETAIL MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 16px; max-width: 520px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 24px; }
+  .modal-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .modal-name { font-size: 16px; font-weight: 700; line-height: 1.4; flex: 1; }
+  .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text3); padding: 0 4px; }
+  .modal-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .modal-section { margin-bottom: 14px; }
+  .modal-label { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .modal-value { font-size: 13px; color: var(--text); line-height: 1.6; }
+  
+
+  .modal-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">서울 <span>정비사업</span> 탐색기 <span style="font-size:13px;font-weight:500;color:var(--text3)">by 수미숨</span></div>
+    <div class="count-badge" id="totalBadge">0건</div>
+    <a href="https://blog.naver.com/sum7788" target="_blank" style="margin-left:auto;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--accent);color:#fff;border-radius:99px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap">✍️ 수미숨 블로그</a>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="구역명, 주소, 건물명, 시공사 검색..." oninput="render()" />
+  </div>
+  <div class="filter-row">
+    <div class="filter-group">
+      <button class="pill active" data-s="all" onclick="setStatus('all',this)">전체</button>
+      <button class="pill s-done" data-s="done" onclick="setStatus('done',this)">🏬 준공</button>
+      <button class="pill s-demo" data-s="demo" onclick="setStatus('demo',this)">⛓️ 철거중</button>
+      <button class="pill s-wip" data-s="wip" onclick="setStatus('wip',this)">🏗️ 공사중</button>
+      <button class="pill s-plan" data-s="plan" onclick="setStatus('plan',this)">📝 계획중</button>
+    </div>
+    <div class="filter-sep"></div>
+    <div class="filter-group">
+      <button class="pill active" data-c="all" onclick="setCategory('all',this)">전체</button>
+      <button class="pill" data-c="상업" onclick="setCategory('상업',this)">🏢 상업</button>
+      <button class="pill" data-c="주거" onclick="setCategory('주거',this)">🏠 주거</button>
+    </div>
+    <div class="filter-sep"></div>
+    <div class="filter-group">
+      <button class="pill active" data-d="all" onclick="setDistrict('all',this)">전 지역</button>
+      <button class="pill" data-d="CBD시청" onclick="setDistrict('CBD시청',this)">CBD(서울역/시청)</button>
+      <button class="pill" data-d="CBD종로" onclick="setDistrict('CBD종로',this)">CBD(광화문/종로)</button>
+      <button class="pill" data-d="CBD을지로" onclick="setDistrict('CBD을지로',this)">CBD(을지로)</button>
+      <button class="pill" data-d="YBD" onclick="setDistrict('YBD',this)">YBD</button>
+      <button class="pill" data-d="마포" onclick="setDistrict('마포',this)">마포</button>
+      <button class="pill" data-d="용산" onclick="setDistrict('용산',this)">용산</button>
+      <button class="pill" data-d="한남" onclick="setDistrict('한남',this)">한남</button>
+      <button class="pill" data-d="흑석" onclick="setDistrict('흑석',this)">흑석</button>
+      <button class="pill" data-d="노량진" onclick="setDistrict('노량진',this)">노량진</button>
+      <button class="pill" data-d="강남" onclick="setDistrict('강남',this)">강남</button>
+      <button class="pill" data-d="성수" onclick="setDistrict('성수',this)">성수</button>
+      <button class="pill" data-d="기타" onclick="setDistrict('기타',this)">기타</button>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="setTab('card',this)">카드 보기</div>
+  <div class="tab" onclick="setTab('news',this)">📋 최신 심의결과 <span id="newsBadge" style="display:none;background:#E24B4A;color:#fff;font-size:10px;padding:1px 5px;border-radius:99px;margin-left:4px;font-weight:700"></span></div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:0 8px">
+    <span style="font-size:11px;color:var(--text3)">정렬</span>
+    <select id="sortSelect" onchange="render()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-family:var(--font);cursor:pointer;outline:none">
+      <option value="default">기본</option>
+      <option value="district">지역순</option>
+      <option value="status">상태순</option>
+      <option value="year">준공연도순</option>
+    </select>
+  </div>
+</div>
+
+<div class="main">
+  <div class="result-info" id="resultInfo"></div>
+  <div id="cardView" class="cards"></div>
+  <div id="newsView" style="display:none;max-width:800px;margin:0 auto"></div>
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-head">
+      <div class="modal-name" id="mName"></div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-badges" id="mBadges"></div>
+    <div id="mBody"></div>
+  </div>
+</div>
+
+<script>
+const DATA = [
+  // ── CBD 시청/서울역 일대 (상업) ──
+  { id:150, name:"남대문구역 제7-1지구", sub:"르스케이프 호텔 옆", addr:"서울 중구 남창동 9-1", district:"CBD시청", category:"주거", status:"plan", phase:"계획", floors:"지하7~지상29층", far:"", use:"장기민간임대주택 299세대+오피스텔 54호+관광숙박시설 140실", note:"도시정비형 재개발사업. 사회초년생 등 1인 가구 대상 장기민간임대주택. 남산·숭례문 방문객 위한 관광숙박시설 140실 포함" },
+  { id:1, name:"봉래구역 제1지구", sub:"봉래동 메리츠 신사옥", addr:"서울 중구 봉래동 1가 57-2번지", district:"CBD시청", category:"상업", status:"done", phase:"준공", floors:"지하6~지상20층", far:"1011.39%", use:"업무시설", note:"2024년 5월 준공" },
+  { id:2, name:"봉래 도시정비형 재개발구역 제2지구", sub:"", addr:"서울 중구 봉래동1가 82", district:"CBD시청", category:"상업", status:"plan", phase:"계획", floors:"최고31층", far:"1,250.9%", use:"업무시설", note:"면적 4279㎡, 건폐율 47.72%", updates:[{date:"2025-03-18",text:"면적 4279㎡, 용적률 1250.9%, 최고31층 확인"}] },
+  { id:3, name:"서소문 11·12지구", sub:"중앙일보·CJ대한통운 부지", addr:"서울 중구 서소문동 37", district:"CBD시청", category:"상업", status:"wip", phase:"착공", floors:"지상36층 / 최고176m", far:"", use:"업무시설", note:"서울 4대문 안 최고 높이 예정" },
+  { id:4, name:"서울역-서대문 1·2구역 제1지구", sub:"호암아트홀", addr:"서울 중구 서소문동 58", district:"CBD시청", category:"상업", status:"wip", phase:"착공", floors:"지하8~지상38층", far:"1040.2%", use:"업무·판매·공연장", note:"개방형녹지 8388㎡(대지의 51.4%)" },
+  { id:5, name:"서소문구역 제10지구", sub:"동화빌딩", addr:"서울 중구 서소문동 58-7", district:"CBD시청", category:"상업", status:"wip", phase:"착공", floors:"지하7~지상19층", far:"", use:"업무·판매시설", note:"JB금융지주 신사옥 예정" },
+  { id:6, name:"서울역 북부 역세권 개발", sub:"한화컨소시엄 / 코레일 토지", addr:"서울 중구 봉래동2가 122", district:"CBD시청", category:"상업", status:"wip", phase:"착공", floors:"지하6~지상38층 / 5개동", far:"", use:"업무+숙박+판매+MICE+오피스텔 / 연면적 35만㎡", note:"면적 2만9093㎡, 2023년 9~10월 착공, 준공 2026년 목표", updates:[{date:"2025-03-18",text:"한화컨소시엄 사업자, 코레일 토지소유 확인"}] },
+  { id:7, name:"봉래구역 제3지구", sub:"SKD&D · 국민연금", addr:"서울 중구 남대문로5가 63-1", district:"CBD시청", category:"상업", status:"plan", phase:"계획", floors:"지하8~지상28층", far:"1,191.11%", use:"업무시설·근린생활시설", note:"면적 4592㎡, 연면적 75788㎡" },
+  { id:8, name:"이오타 서울 (구 힐튼호텔)", sub:"양동 도시정비형 4-2·7지구", addr:"서울 중구 남대문로5가 395", district:"CBD시청", category:"상업", status:"demo", phase:"철거", floors:"지상33층 / 142.8m", far:"1079%", use:"오피스·호텔", note:"철거 진행 중" },
+  { id:10, name:"양동 도시정비형 제11·12지구", sub:"서울역 앞 쪽방촌", addr:"서울 중구 남대문로5가 580", district:"CBD시청", category:"상업", status:"plan", phase:"계획", floors:"지하10~지상32층(업무) / 지하4~지상18층(사회복지)", far:"", use:"업무·공공임대·사회복지", note:"부지 3595㎡, 연면적 60359㎡, 2025~2031년", updates:[{date:"2025-03-18",text:"부지 3595㎡, 연면적 60359㎡, 2025~2031년 사업기간 확인"}] },
+  { id:11, name:"양동 도시정비형 제8-1·6지구", sub:"", addr:"서울 중구 양동 2-1", district:"CBD시청", category:"상업", status:"plan", phase:"계획", floors:"지상35층", far:"", use:"업무시설", note:"" },
+  { id:12, name:"무교다동구역 제29지구", sub:"시청 옆 BNK 지점 자리", addr:"서울 중구 무교동 29", district:"CBD시청", category:"상업", status:"plan", phase:"계획", floors:"지하6~지상23층", far:"887.14%", use:"업무·문화·근린생활", note:"대지 2103㎡, 연면적 27507㎡" },
+  { id:13, name:"무교다동구역 제31지구", sub:"더존을지타워 뒤쪽", addr:"서울 중구 무교동 31", district:"CBD시청", category:"상업", status:"plan", phase:"계획", floors:"지하7~지상27층", far:"1,048.57%", use:"업무·근린생활", note:"대지 1936㎡, 연면적 30088㎡" },
+  { id:15, name:"명동구역 제1지구", sub:"유안타증권 본사 자리", addr:"서울 중구 명동1가 1-1", district:"CBD시청", category:"상업", status:"wip", phase:"착공", floors:"지하8~지상24층", far:"1,031.7%", use:"업무·근린생활", note:"대지 2735㎡, 연면적 45522㎡" },
+  { id:16, name:"을지로2가 제1·3·6·18지구", sub:"신한은행 광교", addr:"서울 중구 삼각동 66-1", district:"CBD시청", category:"상업", status:"plan", phase:"계획", floors:"40층 / 173.8m", far:"1111%", use:"업무시설·문화공간", note:"금융사박물관, 역사 유구 전시공간 포함" },
+  { id:20, name:"뉴국제호텔 리모델링", sub:"SFC 옆", addr:"서울 중구 태평로1가 61", district:"CBD시청", category:"상업", status:"done", phase:"준공", floors:"지상16층", far:"993%", use:"오피스 (호텔→오피스 전환 완료)", note:"리모델링 준공 완료" },
+  { id:25, name:"금세기빌딩 재개발", sub:"서울시청 옆 BNK부산은행 있던 자리", addr:"서울 중구 을지로1가 16 (무교로 6번지)", district:"CBD시청", category:"상업", status:"demo", phase:"철거", floors:"지하6~지상23층", far:"", use:"업무시설+문화집회시설+근린생활", note:"대지 2103㎡, 연면적 27507㎡, 2025.9.25 철거착공식→2026.10 본공사 착수→2030.1 준공 목표", updates:[{date:"2025-03-18",text:"2025.9.25 철거착공식 확인"}] },
+  { id:112, name:"국립중앙의료원 현대화 사업", sub:"보건복지부·국립중앙의료원 시행", addr:"서울 중구 방산동 19", district:"CBD을지로", category:"상업", status:"wip", phase:"착공", floors:"", far:"", use:"병원(776병상 규모)", note:"현부지 27572㎡→이전후 42096㎡, 사업비 1조6272억원, 2014~2028년" },
+  { id:115, name:"남산N타워", sub:"KCC건설 시공", addr:"서울 중구 충무로2가 53-2", district:"CBD시청", category:"상업", status:"wip", phase:"착공", floors:"지하6~지상15층 / 높이 70m", far:"", use:"업무시설", note:"대지 1739㎡, 연면적 20867㎡, 준공 2025년 8월 예정" },
+  { id:116, name:"파라다이스 장충동 플래그십 호텔", sub:"파라다이스그룹", addr:"서울 중구 장충동 2가 186-210", district:"CBD시청", category:"상업", status:"wip", phase:"착공", floors:"지하5~지상18층 / 189실", far:"", use:"호텔 (플래그십)", note:"대지 13950㎡, 연면적 69970㎡, 사업비 5750억, 2025.3.31~2028.8.31" },
+  { id:117, name:"돈의문 2구역 재정비", sub:"HL디엔아이한라 시공", addr:"서울 종로구 통일로 150-7 (교남동 28번지)", district:"CBD종로", category:"주거", status:"plan", phase:"계획", floors:"지하6~지상21층 / 3개동", far:"", use:"공동주택 228세대+오피스+근린생활", note:"시행 지엘돈의문디앤씨, 대지 5883㎡, 연면적 69812㎡, 착공 2026.2, 준공 2030.2 예정" },
+
+  // ── CBD 광화문/종로 (상업) ──
+  { id:14, name:"공평구역 15·16지구", sub:"G1 Seoul", addr:"서울 종로구 인사동 87번지 외", district:"CBD종로", category:"상업", status:"wip", phase:"착공", floors:"A동(지하8~지상25층) / B동(지하8~지상12층)", far:"1,030.03%", use:"업무시설", note:"연면적 143431㎡, 건폐율 58.93%, 준공 2026년 4월 예정", updates:[{date:"2025-03-18",text:"G1 Seoul 사업명 확인, 준공 2026년 4월 예정"}] },
+  { id:17, name:"공평구역 제3지구", sub:"종로타워 뒤", addr:"서울 종로구 공평동 1", district:"CBD종로", category:"상업", status:"plan", phase:"계획", floors:"지상30층 내외 / 140m", far:"1181%", use:"업무·문화시설", note:"지상1~2층 인사동 문화공간 기부채납" },
+  { id:18, name:"서린 도시정비형 제3·4·5지구", sub:"서린빌딩 옆 샤프빌딩 자리", addr:"서울 종로구 서린동 111-1", district:"CBD종로", category:"상업", status:"plan", phase:"계획", floors:"지하3~지상23층", far:"1,060.08%", use:"업무시설·도서관·미술관", note:"사업면적 2830㎡, 연면적 42734㎡", updates:[{date:"2025-03-18",text:"사업면적 2830㎡, 연면적 42734㎡, 용적률 1060.08% 확인"}] },
+  { id:19, name:"수송 도시정비형 제1-2지구", sub:"광화문 앞 대림빌딩", addr:"서울 종로구 수송동 146-12", district:"CBD종로", category:"상업", status:"plan", phase:"계획", floors:"지하7~지상20층 / 90m", far:"985%", use:"업무·문화·근린생활", note:"대지 3612㎡, 연면적 50983㎡, 사업기간 2025~2030년", updates:[{date:"2025-03-18",text:"대지 3612㎡, 연면적 50983㎡ 확인"}] },
+  { id:21, name:"관수동 제3지구", sub:"", addr:"서울 종로구 돈화문로 15(관수동)", district:"CBD종로", category:"상업", status:"plan", phase:"계획", floors:"지상26층 / 109.5m", far:"1181%", use:"업무·근린생활", note:"청계천변 개방형 녹지 연계" },
+  { id:22, name:"관수동 제8지구", sub:"", addr:"서울 종로구 관수동 129-1번지", district:"CBD종로", category:"상업", status:"plan", phase:"계획", floors:"113m 이하", far:"1199%", use:"업무시설", note:"청계천변 개방형 녹지 대지의 25%" },
+  { id:23, name:"종로구청 청사 신축", sub:"수송동 종로구청", addr:"서울 종로구 수송동 146-2", district:"CBD종로", category:"상업", status:"plan", phase:"계획", floors:"지하6~지상16층", far:"", use:"종로구청+구의회+소방서 등", note:"대지 8672㎡, 연면적 83863㎡, 2027~2031년", updates:[{date:"2025-03-18",text:"대지 8672㎡, 연면적 83863㎡ 확인"}] },
+  { id:24, name:"코리안리 수송동 신사옥", sub:"", addr:"서울 종로구 수송동 80", district:"CBD종로", category:"상업", status:"plan", phase:"계획", floors:"지하8~지상21층", far:"", use:"업무시설+클래식공연장", note:"대지 7260㎡, 연면적 112593㎡, 2025~2030년", updates:[{date:"2025-03-18",text:"대지 7260㎡, 연면적 112593㎡ 확인"}] },
+
+  // ── CBD 을지로 (상업) ──
+  { id:30, name:"세운재정비촉진지구 4구역", sub:"세운그라운즈", addr:"서울 중구 을지로4가 594", district:"CBD을지로", category:"상업", status:"demo", phase:"철거", floors:"지상11~18층 / 9개동", far:"", use:"호텔·업무·판매 복합", note:"SH시행 코오롱건설 시공, 철거 완료 후 답보" },
+  { id:31, name:"세운재정비촉진지구 3-1/3-4·5구역", sub:"힐스테이트 세운 센트럴 1,2단지", addr:"서울 중구 을지로3가 208", district:"CBD을지로", category:"주거", status:"done", phase:"준공", floors:"지하8~지상27층 / 2개동", far:"", use:"아파트·도시형생활주택 1022가구", note:"아파트535+도생487" },
+  { id:32, name:"세운재정비촉진지구 3-2·3구역", sub:"프라임오피스 복합업무시설", addr:"서울 중구 을지로3가 300", district:"CBD을지로", category:"상업", status:"wip", phase:"착공", floors:"지하9~지상36층 / 2개동", far:"", use:"프라임오피스 복합업무시설", note:"연면적 16.8만㎡, 2025년 3월 착공, 2029년 완공 예정", updates:[{date:"2025-03-18",text:"2025년 3월 착공, 준공 2029년 목표"}] },
+  { id:33, name:"세운재정비촉진지구 3-6·7구역", sub:"세운 푸르지오 G-팰리스", addr:"서울 중구 입정동 126", district:"CBD을지로", category:"상업", status:"done", phase:"준공", floors:"지하6~지상20층 / 2개동", far:"", use:"생활형숙박시설 756호", note:"완료·운영 중" },
+  { id:34, name:"세운재정비촉진지구 3-8·9·10구역", sub:"3개 구역 통합개발", addr:"서울 중구 을지로3가 301", district:"CBD을지로", category:"상업", status:"plan", phase:"계획", floors:"지하9~지상39층 / 2개동", far:"", use:"업무시설 / 연면적 약 23만㎡", note:"사업시행계획인가 완료" },
+  { id:35, name:"세운5-1·3구역", sub:"", addr:"서울 중구 입정동 126-1", district:"CBD을지로", category:"상업", status:"plan", phase:"계획", floors:"최고37층 / 170m", far:"1519%", use:"업무시설·공공임대산업시설", note:"최상층 전망대, 중소기업 공공임대산업시설" },
+  { id:36, name:"세운재정비촉진지구 6-3-3구역", sub:"프라임오피스 E동", addr:"서울 중구 을지로4가 166", district:"CBD을지로", category:"상업", status:"wip", phase:"착공", floors:"지하8~지상32층", far:"", use:"오피스빌딩", note:"연면적 26189평, 2028년 완공 예정" },
+  { id:37, name:"세운재정비촉진지구 6-3-1·2구역", sub:"을지트윈타워", addr:"서울 중구 을지로4가 166", district:"CBD을지로", category:"상업", status:"done", phase:"준공", floors:"지하8~지상20층", far:"903.83%", use:"업무·근린생활·문화집회 / 연면적 14만㎡", note:"을지로4가역 초역세(2호선·5호선), 대우건설·BC카드 입주" },
+  { id:38, name:"세운재정비촉진지구 6-3-4구역", sub:"세운푸르지오헤리시티", addr:"서울 중구 을지로4가 594", district:"CBD을지로", category:"주거", status:"done", phase:"준공", floors:"26층", far:"", use:"아파트 321세대·도시형생활주택 293세대", note:"" },
+  { id:39, name:"세운재정비촉진지구 6-2-24구역", sub:"더 솔라고 세운", addr:"서울 중구 을지로4가 655", district:"CBD을지로", category:"상업", status:"done", phase:"준공", floors:"지하6~지상14층", far:"", use:"생활형숙박시설 559실", note:"" },
+  { id:40, name:"세운재정비촉진지구 6-2-8구역", sub:"남산 센트럴뷰 스위트", addr:"서울 중구 을지로4가 631", district:"CBD을지로", category:"상업", status:"done", phase:"준공", floors:"지하2~지상17층", far:"", use:"생활형숙박시설 300실", note:"" },
+  { id:41, name:"세운재정비촉진지구 6-2-46구역", sub:"스테이락 호텔", addr:"서울 중구 을지로4가 640", district:"CBD을지로", category:"상업", status:"done", phase:"준공", floors:"지하5~지상12층", far:"", use:"호텔", note:"" },
+  { id:42, name:"을지로3가구역 제1·2지구", sub:"을지파이낸스센터", addr:"서울 중구 수표동 56-1", district:"CBD을지로", category:"상업", status:"wip", phase:"착공", floors:"지하7~지상24층", far:"1,113.3%", use:"업무시설·근린생활시설", note:"연면적 64989㎡, 착공 2025.7, 준공 2028년 예정", updates:[{date:"2025-03-18",text:"을지파이낸스센터 확정, 용적률 1113.3% 확인"}] },
+  { id:43, name:"을지로3가구역 제6지구", sub:"", addr:"서울 중구 수표동 35-10", district:"CBD을지로", category:"상업", status:"wip", phase:"착공", floors:"지하7~지상17층", far:"987.42%", use:"업무시설", note:"연면적 60387㎡, 착공 2023.4, 준공 2026.5 예정" },
+  { id:44, name:"을지로3가구역 제9지구", sub:"센트럴오피스2", addr:"서울 중구 을지로3가 95-11", district:"CBD을지로", category:"상업", status:"wip", phase:"착공", floors:"지하8~지상21층 / 높이 94m", far:"1,081.7%", use:"업무시설·근린생활시설", note:"대지 1916㎡, 연면적 31136㎡, 착공 2025.7, 준공 2028년 예정" },
+  { id:45, name:"을지로3가구역 제12지구", sub:"이을타워", addr:"서울 중구 을지로3가 65-14", district:"CBD을지로", category:"상업", status:"wip", phase:"착공", floors:"지하8~지상17층", far:"989.16%", use:"업무시설", note:"연면적 44906㎡, 착공 2023.9, 준공 2026.11 예정" },
+  { id:46, name:"을지로3가구역 제10지구", sub:"", addr:"서울 중구 을지로3가 90", district:"CBD을지로", category:"상업", status:"wip", phase:"착공", floors:"21층 / 지하8층", far:"", use:"업무시설", note:"연면적 31136㎡, 연내 착공 예정, 준공 2029년" },
+  { id:47, name:"수표도시환경정비구역", sub:"", addr:"서울 중구 수표동 1", district:"CBD을지로", category:"상업", status:"wip", phase:"착공", floors:"지하7~지상33층", far:"1,138%", use:"업무·판매·전시장", note:"연면적 172000㎡, 착공 2024.9, 준공 2028년 예정" },
+  { id:48, name:"초동107-12번지", sub:"", addr:"서울 중구 초동 107-12번지", district:"CBD을지로", category:"상업", status:"plan", phase:"계획", floors:"지하5~지상16층", far:"", use:"업무시설", note:"연면적 38860㎡" },
+  { id:49, name:"세운재정비촉진지구 6-1-3구역", sub:"PJ호텔 삼풍상가 복합개발", addr:"서울 중구 인현동1가 31", district:"CBD을지로", category:"상업", status:"plan", phase:"계획", floors:"업무+숙박 47층 / 주거 54층", far:"", use:"업무+숙박+공동주택+판매시설", note:"부지 15987㎡, 연면적 178000㎡, 뮤지컬공연장 1500석 포함, 준공 2031년" },
+
+  // ── YBD / 여의도 (상업) ──
+  { id:50, name:"앙사나레지던스", sub:"", addr:"서울 영등포구 여의도동 36", district:"YBD", category:"상업", status:"wip", phase:"착공", floors:"지하6~지상57층 / 249.9m", far:"", use:"레지던스·업무·근린생활", note:"서울에서 여섯 번째로 높은 건축물, 스카이 인피니티풀", searchQuery:"앙사나레지던스 여의도"},
+  { id:51, name:"키움 파이낸스 스퀘어", sub:"키움증권 신사옥", addr:"서울 영등포구 여의도동 36-1번지", district:"YBD", category:"상업", status:"plan", phase:"계획", floors:"지하7~지상28층", far:"", use:"프라임오피스·핀테크지원시설", note:"대지 3300㎡, 연면적 58464㎡, 시공사 SK에코플랜트, 사업기간 미정(2025년 8월 이후)" },
+  { id:52, name:"메리츠화재 여의도 사옥", sub:"흥국생명보험생명 소유·동원건설 시공", addr:"서울 영등포구 여의도동 25-1, 25-7번지", district:"YBD", category:"상업", status:"demo", phase:"철거", floors:"지하7~지상19층", far:"", use:"업무시설", note:"대지 2290㎡, 연면적 34972㎡, 사업기간 2025.5.21~2028.6.15" },
+  { id:53, name:"미래에셋증권타워 재개발", sub:"우리금융그룹 인수 → 우리투자증권 신사옥", addr:"서울 영등포구 여의도동 34-3번지", district:"YBD", category:"상업", status:"plan", phase:"계획", floors:"지하7~지상28층", far:"", use:"업무시설 랜드마크", note:"대지 4802㎡, 연면적 82306㎡, 착공 2027년 이후, 준공 2031년 6월" },
+  { id:54, name:"한국화재보험협회 빌딩 재건축", sub:"위탁운용 미래에셋자산운용", addr:"서울 영등포구 여의도동 35-8번지", district:"YBD", category:"상업", status:"plan", phase:"계획", floors:"지하8~지상31층", far:"", use:"업무·근린생활·컨벤션 300석", note:"대지 4314㎡, 연면적 82600㎡, 준공 2028년 예정" },
+  { id:145, name:"여의도 광장아파트 28 재건축", sub:"3~11동 / 한국자산신탁 시행", addr:"서울 영등포구 여의도동 28", district:"YBD", category:"주거", status:"plan", phase:"계획", floors:"최고49층 / 5개동", far:"515%", use:"공동주택 1,314세대 (임대219 포함)", note:"정비계획안 도시계획위원회 통과(2025.12). 조합원 576+공공임대 232+일반분양 583가구. 일반상업지역 종상향. 스카이 커뮤니티·데이케어센터 기부채납. 여의나루로 동쪽", updates:[{date:"2026-03-18",text:"2025년 자료 — 정비계획 통과, 최고49층 1314가구, 일반상업지역 상향", searchQuery:"여의도 광장아파트"}] },
+  { id:146, name:"여의도 광장아파트 38-1 재건축", sub:"1~2동 / 신속통합기획", addr:"서울 영등포구 여의도동 38-1", district:"YBD", category:"주거", status:"plan", phase:"계획", floors:"최고52층 / 3개동", far:"597%", use:"공동주택 414세대 (공공주택 154세대 포함)", note:"정비계획안 도시계획위원회 수정가결(2026.03). 2025.5 신통기획 자문 후 10개월 만에 심의 통과. 일반상업지역 종상향. 어린이 상상랜드 기부채납. 여의나루로 서쪽(여의도역·샛강 사이)", updates:[{date:"2026-03-18",text:"2026.03 자료 — 정비계획 수정가결, 최고52층 414가구, 용적률 597%", searchQuery:"여의도 광장아파트 1동"}] },
+  { id:147, name:"아크로 여의도 더원", sub:"DL이앤씨 시공 / MDM 시행", addr:"서울 영등포구 여의도동 25-11번지 (구 유수홀딩스 부지)", district:"YBD", category:"상업", status:"wip", phase:"착공", floors:"지하7~지상29층 / 1개동", far:"1,007.46%", use:"하이엔드 오피스텔 492실+근린생활시설", note:"대지 5541㎡, 건폐율 59.48%, 총 492실(49/59/99/119㎡), 주차 575대. 2025.8 완판. IFC몰·더현대서울 지하통로 직결. 준공 2026.11 예정", updates:[{date:"2026-03-18",text:"2025년 자료 — 총 492실 2025.8 완판, 준공 2026.11 예정", searchQuery:"아크로여의도더원"}] },
+
+  // ── YBD / 여의도 재건축 (주거) ──
+  { id:55, name:"여의도 대교아파트 재건축", sub:"삼성물산 래미안와이츠", addr:"서울 영등포구 여의도동 14", district:"YBD", category:"주거", status:"plan", phase:"사업시행인가", floors:"최고49층 / 4개동", far:"", use:"공동주택 912세대", note:"신속통합기획 자문 1호 단지. 사업시행인가 완료(2025.8), 시공사 삼성물산. 관리처분인가 준비 중", updates:[{date:"2025-03-18",text:"사업시행인가 완료(2025.8), 시공사 삼성물산(래미안와이츠) 선정", searchQuery:"여의도 대교아파트"}] },
+  { id:56, name:"여의도 시범아파트 재건축", sub:"", addr:"서울 영등포구 여의도동 50", district:"YBD", category:"주거", status:"plan", phase:"사업시행인가", floors:"최고65층", far:"", use:"공동주택 2,493세대", note:"2025.11 정비사업 통합심의 통과. 사업시행인가·관리처분인가 거쳐 2029년 착공 예정. 시공사 선정 중(삼성물산·현대건설·대우건설 3파전)", updates:[{date:"2025-03-18",text:"2025.11 통합심의 통과, 2493세대 확정, 2029년 착공 예정", searchQuery:"여의도 시범아파트"}] },
+  { id:57, name:"여의도 한양아파트 재건축", sub:"현대건설 더치(THE H)", addr:"서울 영등포구 여의도동 21", district:"YBD", category:"주거", status:"plan", phase:"사업시행인가", floors:"지상56층 / 3개동", far:"", use:"공동주택 992세대", note:"사업시행인가 완료. 시공사 현대건설 선정. 관리처분인가 준비 중", updates:[{date:"2025-03-18",text:"사업시행인가 완료, 시공사 현대건설 선정", searchQuery:"여의도 한양아파트"}] },
+  { id:58, name:"여의도 공작아파트 재건축", sub:"대우건설 써밋 더 블랙", addr:"서울 영등포구 여의도동 22", district:"YBD", category:"주거", status:"plan", phase:"사업시행인가", floors:"지상49층 / 3개동", far:"", use:"공동주택 582세대", note:"시공사 대우건설. 통합심의 준비 중", updates:[{date:"2025-03-18",text:"2025년 자료 — 시공사 대우건설 선정, 통합심의 준비", searchQuery:"여의도 공작아파트"}] },
+  { id:59, name:"여의도 서울아파트 재건축", sub:"", addr:"서울 영등포구 여의도동 6", district:"YBD", category:"주거", status:"plan", phase:"계획", floors:"75층 (제안)", far:"", use:"공동주택", note:"주민제안 방식, 조합설립 준비 중", searchQuery:"여의도 서울아파트"},
+  { id:60, name:"여의도 수정아파트 재건축", sub:"", addr:"서울 영등포구 여의도동 7", district:"YBD", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"503.20%", use:"공동주택 498세대", note:"신탁사 갈등으로 사업 추진 동력 약화. 통합심의 준비", updates:[{date:"2025-03-18",text:"2025.9 자료 — 신탁사 갈등으로 속도 저하", searchQuery:"여의도 수정아파트"}] },
+  { id:61, name:"여의도 진주아파트 재건축", sub:"", addr:"서울 영등포구 여의도동 19", district:"YBD", category:"주거", status:"plan", phase:"계획", floors:"최고57층", far:"503.60%", use:"공동주택 578세대", note:"2025년 정비계획 결정. 조합설립 준비 중", updates:[{date:"2025-03-18",text:"2025년 정비계획 결정 확인", searchQuery:"여의도 진주아파트"}] },
+  { id:151, name:"여의도 삼부아파트 재건축", sub:"866세대 → 1,735세대 / 신속통합기획", addr:"서울 영등포구 여의도동 30-3", district:"YBD", category:"주거", status:"plan", phase:"계획", floors:"최고59층", far:"", use:"공동주택 1,735세대", note:"더현대서울 맞은편. 1~5동(30-3번지)은 일반상업지역, 6~11동(30-2번지)은 제3종일반주거지역으로 나뉨. 독립정산제 논의로 조합총회 지연(2025.9). 신통기획 대열 합류 후 정비계획 준비 중", updates:[{date:"2026-03-18",text:"2025년 자료 — 최고59층 1735세대 계획, 내부 독립정산제 갈등으로 진행 지연", searchQuery:"여의도 삼부아파트"}] },
+  { id:152, name:"여의도 삼익아파트 재건축", sub:"360세대 → 630세대", addr:"서울 영등포구 여의도동 20", district:"YBD", category:"주거", status:"plan", phase:"계획", floors:"최고200m", far:"", use:"공동주택 630세대", note:"은하아파트와 인접. 정비계획 열람공고 완료. 샛강역(9호선·신림선)·여의도역(5·9호선) 인접. 입체공원 조성 계획. 일반상업지역 단지로 주거비율 최대 90% 허용", updates:[{date:"2026-03-18",text:"2025년 자료 — 630세대 계획, 최고 200m, 정비계획 열람공고 완료", searchQuery:"여의도 삼익아파트"}] },
+  { id:153, name:"여의도 은하아파트 재건축", sub:"360세대 → 672세대", addr:"서울 영등포구 여의도동 17", district:"YBD", category:"주거", status:"plan", phase:"계획", floors:"최고200m", far:"", use:"공동주택 672세대", note:"삼익아파트와 인접. 정비계획 열람공고 완료. 입체공원 조성 계획. 일반상업지역 단지로 주거비율 최대 90% 허용", updates:[{date:"2026-03-18",text:"2025년 자료 — 672세대 계획, 최고 200m, 정비계획 열람공고 완료", searchQuery:"여의도 은하아파트"}] },
+  { id:154, name:"여의도 화랑아파트 재건축", sub:"소규모 재건축 / 160세대 → 244세대", addr:"서울 영등포구 여의도동 8", district:"YBD", category:"주거", status:"plan", phase:"계획", floors:"지상47층", far:"400%", use:"공동주택 244세대", note:"여의도 첫 소규모 재건축(빈집특례법). 조합설립 인가 완료(2025.12). 준주거지역 종상향. 대지 9395㎡, 동의율 87%. 정비계획 수립·관리처분인가 절차 생략으로 일반 재건축보다 빠른 추진 가능", updates:[{date:"2026-03-18",text:"2025.12 조합설립 인가 완료 — 여의도 첫 소규모 재건축, 47층 244세대", searchQuery:"여의도 화랑아파트"}] },
+  { id:148, name:"여의도 목화아파트 재건축", sub:"신속통합기획 / 1977년 준공", addr:"서울 영등포구 여의도동 30", district:"YBD", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 428세대", note:"부지 1만2,523.6㎡. 2025.11.03 정비계획 수정가결(여의도 7번째). 일반상업지역 종상향. 창업지원시설+공공기숙사 포함(청년·1인가구 일자리-주거 연계). 공공보행통로·입체보행교 설치로 한강공원 접근성 강화. 통합심의 준비 중", updates:[{date:"2026-03-18",text:"2025년 자료 — 2025.11.03 정비계획 수정가결, 최고49층 428세대, 일반상업지역 종상향", searchQuery:"여의도 목화아파트"}] },
+
+  // ── 마포구 ──
+  { id:70, name:"라비움한강(합정7구역)", sub:"", addr:"서울 마포구 합정동 381-49", district:"마포", category:"주거", status:"plan", phase:"계획", floors:"지하7~지상38층", far:"", use:"공동주택 209세대·오피스텔 89호", note:"연면적 42325㎡, 복합문화복지시설 기부채납", searchQuery:"라비움한강 합정동"},
+  { id:71, name:"마포2-7지구", sub:"신촌역 인근", addr:"서울 마포구 신촌동 134", district:"마포", category:"주거", status:"plan", phase:"계획", floors:"지상29층(주택)+지상10층(오피스텔)", far:"", use:"공동주택 196세대·오피스텔 7호", note:"어린이집, 청소년정신건강지원시설 포함" },
+  { id:149, name:"공덕역 자이르네(마포로1구역 도시정비재개발)", sub:"자이S&D", addr:"서울 마포구 공덕동 105", district:"마포", category:"주거", status:"plan", phase:"계획", floors:"지하4~지상20층 / 2개동", far:"", use:"주상복합 아파트 / 일반분양 178가구 (48㎡ 36+52㎡ 36+59㎡ 106)", note:"지상 1~2층 근린생활시설 포함", searchQuery:"공덕역 래미안"},
+  { id:73, name:"마포4-9지구", sub:"", addr:"서울 마포구 노고산동 109", district:"마포", category:"주거", status:"plan", phase:"계획", floors:"지하6~지상28층(주택)/지상27층(오피스텔)", far:"", use:"도시형생활주택 286가구·오피스텔 88실", note:"공공주택 76가구 포함" },
+  { id:74, name:"마포4-10지구", sub:"", addr:"서울 마포구 노고산동 109-62", district:"마포", category:"주거", status:"plan", phase:"계획", floors:"지하7~지상29층", far:"772.9%", use:"공동주택 295세대·오피스텔 18실", note:"대지 3853㎡, 연면적 47685㎡" },
+  { id:75, name:"마포4-12지구", sub:"", addr:"서울 마포구 노고산동 103", district:"마포", category:"주거", status:"plan", phase:"계획", floors:"지하5~지상24층 / 2개동", far:"818.98%", use:"도시형생활주택 236세대·오피스텔 42실", note:"건폐율 59.99%" },
+  { id:76, name:"마포4-1지구", sub:"", addr:"서울 마포구 노고산동 107-2", district:"마포", category:"주거", status:"plan", phase:"계획", floors:"지하5~지상29층", far:"985.24%", use:"도시형생활주택 147세대", note:"공공 29세대 포함" },
+  { id:77, name:"마포로3구역 1지구", sub:"에피트 어바닉", addr:"서울 마포구 아현동 617-1번지", district:"마포", category:"주거", status:"plan", phase:"계획", floors:"지하5~지상24층", far:"665.23%", use:"공동주택 140가구·오피스텔 216실", note:"건폐율 59.71%" },
+  { id:78, name:"마포로5구역 10·11지구", sub:"충정로역 인근", addr:"서울 중구 중림동 157-2번지", district:"마포", category:"주거", status:"plan", phase:"계획", floors:"지하7~지상25층", far:"649.47%", use:"아파트+업무시설+근생+판매시설", note:"부지 13028㎡, 연면적 99746㎡, 시공 자이에스앤디" },
+  { id:79, name:"마포로4 도시정비형 재개발구역", sub:"", addr:"서울 마포구 아현동 617", district:"마포", category:"주거", status:"plan", phase:"계획", floors:"지하4~지상23층", far:"", use:"공동주택 100세대·오피스텔 20세대", note:"연면적 23000㎡, 청년문화복합공간(지하1층)" },
+  { id:83, name:"마포3-3구역 정비사업", sub:"신촌에이텐피에프브이 개발", addr:"서울 마포구 노고산동 31-77", district:"마포", category:"주거", status:"plan", phase:"계획", floors:"지하6~지상37층", far:"", use:"공동주택+근린생활+업무+공공시설", note:"사업부지 3225㎡, 연면적 41795㎡, 2027년 이후 착공 예정" },
+  { id:87, name:"신영 KT신촌지점 개발사업", sub:"에스와이신도시개발", addr:"서울 마포구 동교동 157-1번지", district:"마포", category:"주거", status:"wip", phase:"착공", floors:"지하6~지상20층", far:"", use:"공동주택 238세대+오피스텔 238실+업무·판매", note:"대지 4727㎡, 연면적 49573㎡, 착공 2025.6~준공 2029.2", searchQuery:"동교동 신영빌딩"},
+  { id:88, name:"공덕동 재화스퀘어 재정비", sub:"공덕역 역세권 활성화", addr:"서울 마포구 염리동 168-9번지", district:"마포", category:"상업", status:"plan", phase:"계획", floors:"업무 지하6~지상24층 / 최고 110m", far:"800% 이하", use:"업무시설+공공기여시설", note:"면적 9808㎡, 연면적 업무 98015+공공기여 15995㎡, 착공 2026년 이후" },
+  { id:113, name:"서대문구 신촌 2-2지구 개발", sub:"신촌역 인근 5개 구역", addr:"서울 서대문구 창천동 18-42", district:"마포", category:"상업", status:"plan", phase:"계획", floors:"오피스텔 지하5~지상22층(2-2구역)", far:"", use:"업무+판매+오피스텔", note:"" },
+
+  // ── 용산 ──
+  { id:80, name:"문배업무지구 특별계획구역 2-1", sub:"열정도", addr:"서울 용산구 문배동 42", district:"용산", category:"주거", status:"plan", phase:"계획", floors:"지하8~지상39층 / 7개동", far:"", use:"공동주택 470세대·오피스텔 462호·업무시설", note:"2023년 11월 건축위원회 통과", searchQuery:"문배동 열정도"},
+  { id:81, name:"남영2구역 래미안 수페루스", sub:"삼성물산", addr:"서울 용산구 남영동 79", district:"용산", category:"주거", status:"plan", phase:"계획", floors:"지하7~지상35층 / 4개동", far:"", use:"공동주택 625가구·업무시설", note:"1만7659㎡ 부지", searchQuery:"남영동 래미안수페루스"},
+  { id:9, name:"동자동 제2구역", sub:"DB생명보험㈜ 사업시행", addr:"서울 용산구 동자동 15-1", district:"용산", category:"상업", status:"plan", phase:"계획", floors:"지하7~지상37층 / 높이 170m", far:"1,300%", use:"업무시설", note:"정비구역 면적 10533㎡, 건폐율 50% 이하" },
+  { id:84, name:"나진상가 12·13동 재개발", sub:"서부T&D / 특별계획구역 5", addr:"서울 용산구 한강로3가 2-8, 2-22 (드래곤시티 바로 뒤)", district:"용산", category:"상업", status:"plan", phase:"계획", floors:"지하8~지상18층(오피스) / 지하8~지상27층(오피스텔)", far:"800% 이하", use:"프라임오피스+오피스텔", note:"부지 5792㎡, 연면적 73420㎡, 높이 144m 이하, 착공 2026.6~2028년 하반기 목표" },
+  { id:140, name:"나진상가 10·11동 재개발", sub:"나진산업 / 특별계획구역 4", addr:"서울 용산구 한강로3가 65-270", district:"용산", category:"상업", status:"plan", phase:"계획", floors:"지하6~지상28층", far:"", use:"프라임오피스 (2km 공중산책길·온실공원)", note:"상세 내용 업데이트 예정" },
+  { id:141, name:"나진상가 14동 재개발", sub:"현대엘리베이터 / 특별계획구역 6", addr:"서울 용산구 한강로3가 65-280", district:"용산", category:"상업", status:"plan", phase:"계획", floors:"", far:"", use:"프라임오피스", note:"상세 내용 업데이트 예정. 현대엘리베이터 매각 검토 중(유동적)" },
+  { id:142, name:"나진상가 19·20동 재개발", sub:"나진산업 / 특별계획구역 10", addr:"서울 용산구 한강로2가 314", district:"용산", category:"상업", status:"plan", phase:"계획", floors:"지하6~지상28층", far:"", use:"프라임오피스", note:"상세 내용 업데이트 예정" },
+  { id:143, name:"신문로2구역 12지구", sub:"", addr:"서울 종로구 신문로1가 158", district:"CBD종로", category:"주거", status:"plan", phase:"계획", floors:"높이 90m 이하", far:"1,334%", use:"공동주택 128세대+오피스텔 48실", note:"면적 1142㎡. 일반분양 64세대, 공공임대 49세대, 공공지원민간임대 15세대 포함" },
+  { id:86, name:"오리온 본사부지 개발", sub:"오리온홀딩스 사업시행", addr:"서울 용산구 백범로90다길 13", district:"용산", category:"주거", status:"plan", phase:"계획", floors:"지하5~지상38층 / 3개동", far:"", use:"오피스텔 212실+공동주택 156세대+오피스+근린생활", note:"부지 9640㎡, 연면적 99949㎡, 2026년 하반기~2029년 준공" },
+  { id:144, name:"더 파크사이드 서울", sub:"로즈우드 서울 호텔 복합단지", addr:"서울 용산구 이태원동 22-34", district:"용산", category:"상업", status:"wip", phase:"착공", floors:"지하7층~지상20층", far:"", use:"호텔(로즈우드 서울)+오피스+쇼핑몰(더파크사이드 서울 몰)+오피스텔(더파크사이드 스위트)+아파트 복합단지", note:"국립중앙박물관·용산공원 인근 초프리미엄 복합개발", searchQuery:"파크사이드서울 이태원동"},
+  { id:91, name:"용산국제업무지구", sub:"", addr:"서울 용산구 한강로3가 40-1", district:"용산", category:"상업", status:"wip", phase:"착공", floors:"", far:"", use:"업무+주거+문화+집합시설 복합", note:"면적 456099㎡, 사업비 14조4992억원. 2025년 11월 4주 기공식, 2026년 이후 기반시설 준공(2028년 예정)", searchQuery:"용산국제업무지구"},
+
+  // ── 한남뉴타운 (주거) ──
+  { id:119, name:"한남뉴타운 1구역", sub:"신속통합기획 재추진", addr:"서울 용산구 이태원동 270", district:"한남", category:"주거", status:"plan", phase:"계획", floors:"지하4~지상25층 / 10개동", far:"", use:"공동주택 약 1,000세대", note:"2017년 정비구역 해제 후 서울시 신속통합기획 주택재개발 후보지로 재선정. 이태원동 일대 면적 5만3350㎡. 경리단길 인접", updates:[{date:"2026-03-18",text:"2025년 자료 — 신속통합기획 후보지 재선정, 약 1000세대 계획", searchQuery:"한남뉴타운 1구역"}] },
+  { id:120, name:"한남뉴타운 2구역", sub:"대우건설 한남써밋", addr:"서울 용산구 한남동 1-73", district:"한남", category:"주거", status:"plan", phase:"관리처분인가", floors:"지하6~지상14층 / 31개동", far:"195.42%", use:"공동주택 1,537세대", note:"관리처분인가 2025.7.25 취득. 이주 2025년 10월~ 예정. 시공사 대우건설, 6호선 이태원역 역세권", updates:[{date:"2025-03-18",text:"2025년 자료 — 관리처분인가 2025.7.25, 이주 10월 예정, 최고높이 40.5m", searchQuery:"한남써밋"}] },
+  { id:121, name:"한남뉴타운 3구역", sub:"현대건설 디에이치 한남", addr:"서울 용산구 한남동 686", district:"한남", category:"주거", status:"demo", phase:"철거", floors:"지하7~지상22층 / 127개동", far:"", use:"공동주택 5,970세대", note:"한남뉴타운 최대 규모. 2025.2 철거 시작. 이주율 99.3% 이상. 2026년 착공, 2029년 입주 예정", updates:[{date:"2025-03-18",text:"2025년 자료 — 2025.2 철거 시작, 이주율 99.3%, 착공 2026년, 입주 2029년", searchQuery:"디에이치한남"}] },
+  { id:122, name:"한남뉴타운 4구역", sub:"", addr:"서울 용산구 보광동 331", district:"한남", category:"주거", status:"plan", phase:"사업시행인가", floors:"", far:"", use:"공동주택 2,257세대", note:"사업시행계획인가 준비 중. 일반분양 비율 40% 이상, 한강 조망 50% 이상. 신분당선 보광역 신설 기대", updates:[{date:"2025-03-18",text:"2025년 자료 — 사업시행계획인가 준비 중", searchQuery:"한남뉴타운 4구역"}] },
+  { id:123, name:"한남뉴타운 5구역", sub:"DL이앤씨 아크로 한남", addr:"서울 용산구 보광동 411", district:"한남", category:"주거", status:"plan", phase:"사업시행인가", floors:"최고23층 / 51개동", far:"", use:"공동주택 2,592세대", note:"시공사 DL이앤씨(아크로 한남). 사업시행계획인가 2025년 6월 신청 예정. 착공 2027년 하반기 목표", updates:[{date:"2025-03-18",text:"2025년 자료 — DL이앤씨 시공사 선정, 2025.6 사업시행인가 신청 예정", searchQuery:"아크로한남"}] },
+
+  // ── 흑석뉴타운 (주거) ──
+  { id:130, name:"흑석9구역 재개발", sub:"현대건설 디에이치 켄트로나인", addr:"서울 동작구 흑석동 90", district:"흑석", category:"주거", status:"wip", phase:"착공", floors:"지하6~지상20층 / 12개동", far:"", use:"공동주택 1,536세대", note:"착공 2025.4.11. 입주 2029년 예정. 9호선 흑석역 역세권. 한강 조망권. 흑석고 신설 부지 기부채납", updates:[{date:"2025-03-18",text:"2025년 자료 — 2025.4.11 착공식, 현대건설 디에이치 켄트로나인, 입주 2029년", searchQuery:"디에이치켄트로나인"}] },
+  { id:131, name:"흑석11구역 재개발", sub:"대우건설 푸르지오 써밋더힐", addr:"서울 동작구 흑석동 304", district:"흑석", category:"주거", status:"wip", phase:"착공", floors:"", far:"", use:"공동주택 1,511세대", note:"착공 2025.9 목표. 일반분양 2026년 말~2027년 예정. 관리처분계획인가 변경 절차 진행 중", updates:[{date:"2025-03-18",text:"2025년 자료 — 착공 2025.9 목표, 대우건설 써밋더힐, 1511세대", searchQuery:"흑석11구역 푸르지오써밋"}] },
+
+  // ── 노량진뉴타운 (주거) ──
+  { id:100, name:"노량진뉴타운 1구역", sub:"포스코이앤씨 오티에르", addr:"서울 동작구 노량진동 320", district:"노량진", category:"주거", status:"plan", phase:"사업시행인가", floors:"최고33층", far:"", use:"공동주택 2,992세대", note:"사업시행인가 완료(관리처분인가 전)", updates:[{date:"2026-03-18",text:"총 2,992세대, 브랜드 오티에르 확인", searchQuery:"노량진1구역"}] },
+  { id:101, name:"노량진뉴타운 2구역", sub:"SK에코플랜트 SK DEFINE", addr:"서울 동작구 노량진동 305", district:"노량진", category:"주거", status:"wip", phase:"착공", floors:"45층", far:"", use:"공동주택 415세대", note:"착공 2025.12, 입주 2029.11 예정", updates:[{date:"2026-03-18",text:"총 415세대, 착공 2025.12, 입주 2029.11", searchQuery:"노량진2구역"}] },
+  { id:102, name:"노량진뉴타운 3구역", sub:"포스코이앤씨 오티에르", addr:"서울 동작구 노량진동 330", district:"노량진", category:"주거", status:"plan", phase:"사업시행인가", floors:"", far:"", use:"공동주택 1,069세대", note:"사업시행인가 완료(관리처분인가 전)", updates:[{date:"2026-03-18",text:"총 1,069세대, 브랜드 오티에르", searchQuery:"노량진3구역"}] },
+  { id:103, name:"노량진뉴타운 4구역", sub:"현대건설 디에이치", addr:"서울 동작구 노량진동 260", district:"노량진", category:"주거", status:"demo", phase:"철거", floors:"최고35층 / 7개동", far:"", use:"공동주택 860세대", note:"이주 완료, 철거 중", updates:[{date:"2026-03-18",text:"총 860세대, 브랜드 디에이치", searchQuery:"디에이치 노량진4구역"}] },
+  { id:104, name:"노량진뉴타운 5구역", sub:"대우건설 써밋", addr:"서울 동작구 노량진동 230", district:"노량진", category:"주거", status:"demo", phase:"이주", floors:"지하5~지상28층 / 9개동", far:"", use:"공동주택 727세대", note:"이주 중", updates:[{date:"2026-03-18",text:"총 727세대, 브랜드 써밋", searchQuery:"노량진5구역"}] },
+  { id:105, name:"노량진뉴타운 6구역", sub:"GS건설+SK에코플랜트 라클라체 자이드파인", addr:"서울 동작구 노량진동 302-160", district:"노량진", category:"주거", status:"wip", phase:"착공", floors:"지하4~지상28층 / 14개동", far:"", use:"공동주택 1,499세대", note:"착공 2025.6.27, 입주 2028.11 예정", updates:[{date:"2026-03-18",text:"총 1,499세대, 착공 2025.6, 입주 2028.11", searchQuery:"라클라체자이드파인"}] },
+  { id:106, name:"노량진뉴타운 7구역", sub:"SK에코플랜트 SK DEFINE", addr:"서울 동작구 노량진동 340", district:"노량진", category:"주거", status:"plan", phase:"이주", floors:"", far:"", use:"공동주택 576세대 (분양478+임대98)", note:"관리처분인가 2024.05.07. 이주 중(24.11~). 착공 2027년 예정", updates:[{date:"2026-03-18",text:"총 576세대, 관리처분인가 완료, 이주 중", searchQuery:"노량진7구역"}] },
+  { id:107, name:"노량진뉴타운 8구역", sub:"DL이앤씨 아크로리버스카이", addr:"서울 동작구 대방동 394", district:"노량진", category:"주거", status:"wip", phase:"착공", floors:"", far:"", use:"공동주택 1,007세대", note:"착공 완료, 입주 2029년 하반기 예정", updates:[{date:"2026-03-18",text:"총 1,007세대, 브랜드 아크로리버스카이, 입주 2029년 하반기", searchQuery:"아크로리버스카이 노량진"}] },
+
+  // ── 강남 ──
+  { id:110, name:"삼성생명 삼성동 업무복합 특별계획구역", sub:"옛 한국감정원 부지", addr:"서울 강남구 삼성동 171-2번지", district:"강남", category:"상업", status:"plan", phase:"계획", floors:"지하7~지상38층 / 200m 이하", far:"", use:"업무·근린생활 특화전시시설", note:"면적 10988㎡, 연면적 126536㎡, 2027~2031년", searchQuery:"한국감정원 삼성동"},
+  { id:111, name:"현대차 GBC", sub:"옛 한국전력 부지", addr:"서울 강남구 삼성동 167번지", district:"강남", category:"상업", status:"wip", phase:"착공", floors:"지하7~지상54층 / 3동 / 242m", far:"", use:"업무+숙박+판매+문화집회+관광휴게", note:"면적 79341㎡, 연면적 약 99만㎡, 2020.5~2030년 상반기", searchQuery:"현대자동차 GBC 삼성동"},
+
+  // ── 성수 ──
+  { id:114, name:"삼표레미콘 부지 개발", sub:"SP성수PFV 시행", addr:"서울 성동구 성수동1가 683", district:"성수", category:"상업", status:"plan", phase:"계획", floors:"지하9~지상77층 / 2개동", far:"", use:"업무+오피스텔+공동주택+숙박·문화·판매", note:"부지 28106㎡, 연면적 447913㎡, 착공 2026년 하반기", searchQuery:"삼표산업 성수동"},
+
+  // ── 기타 ──
+  { id:90, name:"노들섬 개발", sub:"", addr:"서울 동작구 노들로 (한강)", district:"기타", category:"상업", status:"wip", phase:"착공", floors:"", far:"", use:"복합문화공간", note:"2025년 착공, 2027년 준공 예정", searchQuery:"노들섬"},
+  { id:92, name:"서울링", sub:"", addr:"서울 마포구 하늘공원로 108", district:"기타", category:"상업", status:"plan", phase:"계획", floors:"", far:"", use:"관광시설·전망링", note:"마포구 월드컵공원 내. 2026년 조기 착공 목표", searchQuery:"서울 월드컵공원"},
+
+  // ── 목동 재건축 (주거) ──
+  { id:200, name:"목동신시가지 1단지 재건축", sub:"신탁방식 (우리자산신탁)", addr:"서울 양천구 목동 916", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 3,500세대 (기존 1,882세대)", note:"2025년 12월 정비구역 지정 고시 완료. 신탁방식. 목동그린웨이 조성 조건 3종 종상향. 9호선 신목동역 인접", updates:[{date:"2026-03-19",text:"2025.12.04 정비구역 지정 고시 — 기존 1,882세대→3,500세대, 최고 49층, 근린공원 1만500㎡ 신설"}] },
+  { id:201, name:"목동신시가지 2단지 재건축", sub:"신탁방식 (하나자산신탁)", addr:"서울 양천구 목동 920", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 3,389세대 (기존 1,640세대)", note:"2025년 12월 정비구역 지정 고시 완료. 신탁방식. 파리공원·용왕산근린공원 녹지 특화", updates:[{date:"2026-03-19",text:"2025.12.04 정비구역 지정 고시 — 기존 1,640세대→3,389세대, 최고 49층"}] },
+  { id:202, name:"목동신시가지 3단지 재건축", sub:"조합방식", addr:"서울 양천구 목동 924", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 3,317세대 (기존 1,588세대)", note:"2025년 12월 정비구역 지정 고시 완료. 조합방식(주민투표 96.26% 조합 지지). 근린공원 1만㎡ 조성", updates:[{date:"2026-03-19",text:"2025.12.04 정비구역 지정 고시 — 기존 1,588세대→3,317세대, 최고 49층"}] },
+  { id:203, name:"목동신시가지 4단지 재건축", sub:"조합방식", addr:"서울 양천구 목동 928", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 (기존 1,397세대)", note:"정비구역 지정 완료. 조합방식. 조합설립 추진위 구성 승인", updates:[{date:"2026-03-19",text:"정비구역 지정 완료, 조합설립 추진위 구성 승인"}] },
+  { id:204, name:"목동신시가지 5단지 재건축", sub:"신탁방식 / 사업시행자 지정 완료", addr:"서울 양천구 목동 932", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 (기존 1,342세대)", note:"정비구역 지정 완료. 신탁방식. 사업시행자 지정 완료(2025.12 고시). 전용 115㎡ 35.4억 신고가", updates:[{date:"2026-03-19",text:"2025.12 사업시행자 지정 고시 완료 — 신탁방식 5개 단지 중 하나"}] },
+  { id:205, name:"목동신시가지 6단지 재건축", sub:"조합방식 / 목동 최초 조합설립인가", addr:"서울 양천구 목동 936", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 2,173세대 (기존 1,316세대)", note:"2025년 목동 14개 단지 중 최초로 조합설립인가. 설계사 건원건축 선정(2025.8). 2026년 상반기 시공사 선정 목표. 삼성물산 등 수주 검토 중", updates:[{date:"2026-03-19",text:"목동 최초 조합설립인가(2025.5), 설계사 건원건축 선정(2025.8), 시공사 선정 2026년 상반기 목표"}] },
+  { id:206, name:"목동신시가지 7단지 재건축", sub:"조합방식", addr:"서울 양천구 목동 940", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 (기존 1,554세대)", note:"정비구역 지정 완료. 조합방식. 목동역 남북 분리 단지", updates:[{date:"2026-03-19",text:"정비구역 지정 완료"}] },
+  { id:207, name:"목동신시가지 8단지 재건축", sub:"신탁방식", addr:"서울 양천구 신정동 322", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고43층", far:"", use:"공동주택 (기존 1,320세대)", note:"정비구역 지정 완료. 신탁방식. 8~14단지(신정동 소재) 뒷단지군 — 최고 40~43층", updates:[{date:"2026-03-19",text:"정비구역 지정 완료, 최고 43층"}] },
+  { id:208, name:"목동신시가지 9단지 재건축", sub:"신탁방식 / 사업시행자 지정 완료 (한국자산신탁)", addr:"서울 양천구 신정동 323", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 (기존 2,040세대)", note:"정비구역 지정 완료. 한국자산신탁 사업시행자 지정 완료", updates:[{date:"2026-03-19",text:"한국자산신탁 사업시행자 지정 완료"}] },
+  { id:209, name:"목동신시가지 10단지 재건축", sub:"신탁방식 / 사업시행자 지정 완료 (한국토지신탁)", addr:"서울 양천구 신정동 324", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고43층", far:"", use:"공동주택 (기존 1,560세대)", note:"정비구역 지정 완료. 한국토지신탁 사업시행자 지정 완료", updates:[{date:"2026-03-19",text:"한국토지신탁 사업시행자 지정 완료"}] },
+  { id:210, name:"목동신시가지 11단지 재건축", sub:"신탁방식", addr:"서울 양천구 신정동 325", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고43층", far:"", use:"공동주택 (기존 1,540세대)", note:"정비구역 지정 완료. 신탁방식", updates:[{date:"2026-03-19",text:"정비구역 지정 완료"}] },
+  { id:211, name:"목동신시가지 12단지 재건축", sub:"조합방식", addr:"서울 양천구 신정동 326", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 (기존 1,254세대)", note:"정비구역 지정 완료. 조합방식", updates:[{date:"2026-03-19",text:"정비구역 지정 완료"}] },
+  { id:212, name:"목동신시가지 13단지 재건축", sub:"신탁방식 / 사업시행자 지정 완료 (대신자산신탁)", addr:"서울 양천구 신정동 327", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 (기존 1,872세대)", note:"정비구역 지정 완료. 신탁 추진 단지 중 최초 사업시행자 지정(대신자산신탁)", updates:[{date:"2026-03-19",text:"신탁 추진 단지 중 최초 사업시행자 지정 완료 (대신자산신탁)"}] },
+  { id:213, name:"목동신시가지 14단지 재건축", sub:"신탁방식 / 사업시행자 지정 완료 (KB부동산신탁)", addr:"서울 양천구 신정동 328", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 5,123세대 (기존 2,520세대) — 14개 단지 중 최대", note:"정비구역 지정 완료. KB부동산신탁 사업시행자 지정 완료. 부지 25만722㎡ — 목동 최대 규모. DL이앤씨 수주 검토 중", updates:[{date:"2026-03-19",text:"KB부동산신탁 사업시행자 지정 완료 — 목동 최대 단지(5,123세대, 부지 25만㎡)"}] },
+];
+
+
+const STATUS_LABEL = { done:"준공", demo:"철거중", wip:"공사중", plan:"계획중" };
+const STATUS_CLASS = { done:"b-done", demo:"b-demo", wip:"b-wip", plan:"b-plan" };
+
+let currentStatus = "all";
+let currentDistrict = "all";
+let currentCategory = "all";
+let currentTab = "card";
+
+function setStatus(v, el) {
+  currentStatus = v;
+  document.querySelectorAll('[data-s]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+function setCategory(v, el) {
+  currentCategory = v;
+  document.querySelectorAll('[data-c]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+function setDistrict(v, el) {
+  currentDistrict = v;
+  document.querySelectorAll('[data-d]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+function setTab(t, el) {
+  currentTab = t;
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('cardView').style.display = t === 'card' ? '' : 'none';
+  document.getElementById('newsView').style.display = t === 'news' ? '' : 'none';
+  document.getElementById('resultInfo').style.display = t === 'card' ? '' : 'none';
+  if (t === 'news') loadNews();
+  else render();
+}
+
+
+const STATUS_ORDER = { wip:0, demo:1, plan:2, done:3 };
+const DISTRICT_ORDER = { 'CBD시청':0,'CBD종로':1,'CBD을지로':2,'YBD':3,'마포':4,'용산':5,'한남':6,'흑석':7,'노량진':8,'강남':9,'성수':10,'기타':11 };
+
+function filtered() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const sort = document.getElementById('sortSelect')?.value || 'default';
+  let list = DATA.filter(d => {
+    const ms = currentStatus === 'all' || d.status === currentStatus;
+    const md = currentDistrict === 'all' || d.district === currentDistrict;
+    const mc = currentCategory === 'all' || d.category === currentCategory;
+    const mq = !q || [d.name,d.sub,d.addr,d.use,d.note,d.phase||''].join(' ').toLowerCase().includes(q);
+    return ms && md && mc && mq;
+  });
+  if (sort === 'district') list.sort((a,b) => (DISTRICT_ORDER[a.district]??99)-(DISTRICT_ORDER[b.district]??99));
+  else if (sort === 'status') list.sort((a,b) => (STATUS_ORDER[a.status]??99)-(STATUS_ORDER[b.status]??99));
+  else if (sort === 'year') list.sort((a,b) => {
+    const ya = parseInt(a.note?.match(/20\d\d/)?.[0])||9999;
+    const yb = parseInt(b.note?.match(/20\d\d/)?.[0])||9999;
+    return ya - yb;
+  });
+  return list;
+}
+
+function render() {
+  const list = filtered();
+  document.getElementById('totalBadge').textContent = DATA.length + '건';
+  document.getElementById('resultInfo').textContent = `${list.length}건 표시 중 (전체 ${DATA.length}건)`;
+  renderCards(list);
+}
+
+function naverMapUrl(addr) {
+  return 'https://map.naver.com/v5/search/' + encodeURIComponent(addr);
+}
+
+function renderCards(list) {
+  const wrap = document.getElementById('cardView');
+  if (!list.length) {
+    wrap.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🔍</div><div>검색 결과가 없습니다</div></div>';
+    return;
+  }
+  wrap.innerHTML = list.map(d => {
+    const yearMatch = [d.note, d.use].join(' ').match(/준공\s*(\d{4})|(\d{4})[년\s]*준공|입주\s*(\d{4})|(\d{4})[년\s]*입주/);
+    const year = yearMatch ? (yearMatch[1]||yearMatch[2]||yearMatch[3]||yearMatch[4]) : null;
+    return `
+    <div class="card" onclick="openModal(${d.id})">
+      <div class="card-head">
+        <div class="card-name">${d.category === '주거' ? '🏠' : '🏢'} ${d.name}</div>
+        <div class="badge ${STATUS_CLASS[d.status]}">${STATUS_LABEL[d.status]}</div>
+      </div>
+      ${d.sub ? `<div class="card-sub">${d.sub}</div>` : ''}
+      <div class="card-addr">📍 ${d.addr}</div>
+      <div class="card-tags">
+        <span class="district-tag d-${d.district}">${d.district}</span>
+        ${d.phase ? `<span class="phase-badge">${d.phase}</span>` : ''}
+        ${year ? `<span class="year-tag">🏁 ${year}</span>` : ''}
+        ${d.floors ? `<span class="tag">${d.floors}</span>` : ''}
+        ${d.use ? `<span class="tag">${d.use.length > 18 ? d.use.slice(0,18)+'…' : d.use}</span>` : ''}
+        ${d.far ? `<span class="tag">용적률 ${d.far}</span>` : ''}
+      </div>
+      <a class="naver-btn" href="${naverMapUrl(d.addr)}" target="_blank" onclick="event.stopPropagation()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        네이버 지도
+      </a>
+    </div>
+  `}).join('');
+}
+
+function openModal(id) {
+  const d = DATA.find(x => x.id === id);
+  if (!d) return;
+  document.getElementById('mName').textContent = d.name;
+  document.getElementById('mBadges').innerHTML = `
+    <span class="badge ${STATUS_CLASS[d.status]}" style="font-size:12px;padding:4px 10px">${STATUS_LABEL[d.status]}</span>
+    <span style="font-size:12px;padding:4px 10px;background:${d.category==='주거'?'#eaf3de':'#e6f1fb'};color:${d.category==='주거'?'#1D9E75':'#185FA5'};border-radius:99px;font-weight:600">${d.category==='주거'?'🏠 주거':'🏢 상업'}</span>
+    ${d.phase ? `<span class="phase-badge" style="font-size:12px;padding:4px 10px">${d.phase}</span>` : ''}
+    <span class="district-tag d-${d.district}" style="font-size:12px;padding:4px 10px">${d.district}</span>
+  `;
+  let body = '';
+  if (d.sub) body += `<div class="modal-section"><div class="modal-label">별칭</div><div class="modal-value">${d.sub}</div></div>`;
+  if (d.addr) body += `<div class="modal-section"><div class="modal-label">위치</div><div class="modal-value">${d.addr}<br><a class="naver-btn" href="${naverMapUrl(d.addr)}" target="_blank" style="margin-top:6px;display:inline-flex"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> 네이버 지도에서 보기</a></div></div>`;
+  if (d.floors) body += `<div class="modal-section"><div class="modal-label">규모</div><div class="modal-value">${d.floors}</div></div>`;
+  if (d.far) body += `<div class="modal-section"><div class="modal-label">용적률</div><div class="modal-value">${d.far}</div></div>`;
+  if (d.use) body += `<div class="modal-section"><div class="modal-label">용도</div><div class="modal-value">${d.use}</div></div>`;
+  if (d.note) body += `<hr class="modal-divider"><div class="modal-section"><div class="modal-label">비고</div><div class="modal-value">${d.note}</div></div>`;
+  if (d.updates && d.updates.length) {
+    body += `<hr class="modal-divider"><div class="modal-section"><div class="modal-label">업데이트 히스토리</div><div style="margin-top:8px;display:flex;flex-direction:column;gap:0">`;
+    [...d.updates].reverse().forEach((u, i) => {
+      const isLast = i === d.updates.length - 1;
+      body += `<div style="display:flex;gap:12px;position:relative">
+        <div style="display:flex;flex-direction:column;align-items:center;width:16px;flex-shrink:0">
+          <div style="width:9px;height:9px;border-radius:50%;background:var(--accent);margin-top:3px;flex-shrink:0"></div>
+          ${!isLast ? `<div style="width:1px;flex:1;background:var(--border);margin:3px 0"></div>` : ''}
+        </div>
+        <div style="padding-bottom:12px">
+          <div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:2px">${u.date}</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.5">${u.text}</div>
+        </div>
+      </div>`;
+    });
+    body += `</div></div>`;
+  }
+  document.getElementById('mBody').innerHTML = body;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(e) { if (e.target === document.getElementById('modalOverlay')) closeModalDirect(); }
+function closeModalDirect() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+// ── 최신 심의결과 뉴스 ──
+const NEWS_JSON_URL = 'https://raw.githubusercontent.com/sum7788/seoul/main/data/committee_results.json';
+let newsCache = null;
+
+async function loadNews() {
+  const wrap = document.getElementById('newsView');
+  if (newsCache) { renderNews(newsCache); return; }
+  wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3)">⏳ 심의결과 불러오는 중...</div>';
+  try {
+    const res = await fetch(NEWS_JSON_URL);
+    const data = await res.json();
+    newsCache = data;
+    if (data.items && data.items.length) {
+      const badge = document.getElementById('newsBadge');
+      badge.textContent = data.items.length;
+      badge.style.display = 'inline';
+    }
+    renderNews(data);
+  } catch(e) {
+    wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">📭</div><div>심의결과 데이터를 불러올 수 없어요</div></div>';
+  }
+}
+
+function renderNews(data) {
+  const wrap = document.getElementById('newsView');
+  if (!data.items || !data.items.length) {
+    wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3)">아직 수집된 뉴스가 없어요</div>';
+    return;
+  }
+  const updatedStr = data.updated ? `<div style="font-size:11px;color:var(--text3);margin-bottom:16px">마지막 수집: ${data.updated} · 매주 월요일 자동 업데이트</div>` : '';
+  const items = data.items.map(item => `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">
+        <a href="${item.url}" target="_blank" style="font-size:14px;font-weight:600;color:var(--text);text-decoration:none;line-height:1.4;flex:1">${item.title}</a>
+        <span style="font-size:11px;color:var(--text3);white-space:nowrap;flex-shrink:0">${item.date || item.collected_at || ''}</span>
+      </div>
+      ${item.summary ? `<div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:10px">${item.summary}</div>` : ''}
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="font-size:11px;color:var(--text3);background:var(--bg);padding:2px 8px;border-radius:99px">${item.source || ''}</span>
+        <a href="${item.url}" target="_blank" style="font-size:11px;color:var(--accent);font-weight:600;text-decoration:none">원문 보기 →</a>
+      </div>
+    </div>
+  `).join('');
+  wrap.innerHTML = `<div style="margin-bottom:16px"><div style="font-size:18px;font-weight:700;margin-bottom:4px">📋 정비사업 통합심의 최신 결과</div>${updatedStr}</div>${items}`;
+}
+
+render();
+</body>
+</html>
