@@ -62,6 +62,7 @@ body { background:var(--bg); font-family:var(--font); color:var(--text); min-hei
 .d-한남  { background:#FCEBEB; color:#A32D2D; }
 .d-강남  { background:#E6F1FB; color:#185FA5; }
 .d-성수  { background:#FBEAF0; color:#72243E; }
+.d-양천  { background:#FEF3E2; color:#8B5E00; }
 .d-기타  { background:#F1EFE8; color:#5F5E5A; }
 .phase-badge { font-size:10px; padding:2px 8px; border-radius:4px; background:#f0edf8; color:#534AB7; font-weight:600; border:1px solid #d8d3f5; white-space:nowrap; }
 .year-tag { font-size:10px; padding:2px 7px; border-radius:4px; background:#f5f0ff; color:#6B3FA0; border:1px solid #ddd5f5; font-weight:600; white-space:nowrap; }
@@ -122,6 +123,7 @@ body { background:var(--bg); font-family:var(--font); color:var(--text); min-hei
       <button class="pill" onclick="setDist('노량진',this)">노량진</button>
       <button class="pill" onclick="setDist('강남',this)">강남</button>
       <button class="pill" onclick="setDist('성수',this)">성수</button>
+      <button class="pill" onclick="setDist('양천',this)">양천</button>
       <button class="pill" onclick="setDist('기타',this)">기타</button>
     </div>
   </div>
@@ -296,27 +298,27 @@ const DATA = [
   { id:92, name:"서울링", sub:"", addr:"서울 마포구 하늘공원로 108", district:"기타", category:"상업", status:"plan", phase:"계획", floors:"", far:"", use:"관광시설·전망링", note:"마포구 월드컵공원 내. 2026년 조기 착공 목표", searchQuery:"서울 월드컵공원"},
 
   // ── 목동신시가지 재건축 (주거) — 2025년 12월 14개 단지 전체 정비구역 지정 완료 ──
-  { id:200, name:"목동신시가지 1단지", sub:"신탁방식 (우리자산신탁)", addr:"서울 양천구 목동 916", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 3,500세대 (현재 1,882세대)", note:"2025.12.04 정비구역 지정 고시. 신탁방식. 기존 15층 1,882세대→49층 3,500세대. 목동그린웨이 조성 조건 3종 종상향. 9호선 신목동역 인접. 근린공원 1만500㎡ 신설", updates:[{date:"2026-03-19",text:"2025.12.04 정비구역 지정 — 1,882→3,500세대, 최고 49층"}] },
-  { id:201, name:"목동신시가지 2단지", sub:"신탁방식 (하나자산신탁)", addr:"서울 양천구 목동 920", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 3,389세대 (현재 1,640세대)", note:"2025.12.04 정비구역 지정 고시. 신탁방식. 기존 1,640세대→3,389세대. 파리공원·용왕산근린공원 녹지 특화", updates:[{date:"2026-03-19",text:"2025.12.04 정비구역 지정 — 1,640→3,389세대, 최고 49층"}] },
-  { id:202, name:"목동신시가지 3단지", sub:"조합방식 (주민투표 96.26%)", addr:"서울 양천구 목동 924", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 3,317세대 (현재 1,588세대)", note:"2025.12.04 정비구역 지정 고시. 조합방식. 기존 1,588세대→3,317세대. 근린공원 1만㎡ 조성", updates:[{date:"2026-03-19",text:"2025.12.04 정비구역 지정 — 1,588→3,317세대, 최고 49층"}] },
-  { id:203, name:"목동신시가지 4단지", sub:"조합방식", addr:"서울 양천구 목동 928", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 2,831세대 (현재 1,397세대)", note:"정비구역 지정 완료. 조합방식. 조합설립 추진위 구성 승인. 기존 1,397세대에서 대폭 증가 예정", updates:[{date:"2026-03-19",text:"정비구역 지정 완료 — 조합설립 추진위 승인"}] },
-  { id:204, name:"목동신시가지 5단지", sub:"신탁방식 / 사업시행자 지정 완료", addr:"서울 양천구 목동 932", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 2,770세대 (현재 1,342세대)", note:"정비구역 지정 완료. 신탁방식. 사업시행자 지정 완료(2025.12 고시). 기존 1,342세대에서 증가 예정", updates:[{date:"2026-03-19",text:"2025.12 사업시행자 지정 고시 완료"}] },
-  { id:205, name:"목동신시가지 6단지", sub:"조합방식 / 목동 최초 조합설립인가", addr:"서울 양천구 목동 936", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 2,173세대 (현재 1,316세대)", note:"목동 14개 단지 중 최초 조합설립인가(2025.5). 설계사 건원건축 선정(2025.8). 2026년 상반기 통합심의·시공사 선정 목표. 삼성물산·GS건설 등 수주 경쟁", updates:[{date:"2026-03-19",text:"2025.05 목동 최초 조합설립인가 — 시공사 선정 2026년 상반기 목표"}] },
-  { id:206, name:"목동신시가지 7단지", sub:"조합방식", addr:"서울 양천구 목동 940", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 3,153세대 (현재 1,554세대)", note:"정비구역 지정 완료. 조합방식. 목동역 남북 분리 단지. 기존 1,554세대에서 증가 예정", updates:[{date:"2026-03-19",text:"정비구역 지정 완료"}] },
-  { id:207, name:"목동신시가지 8단지", sub:"신탁방식", addr:"서울 양천구 신정동 322", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고43층", far:"", use:"공동주택 2,659세대 (현재 1,320세대)", note:"정비구역 지정 완료. 신탁방식. 신정동 소재 뒷단지군. 최고 43층", updates:[{date:"2026-03-19",text:"정비구역 지정 완료, 최고 43층"}] },
-  { id:208, name:"목동신시가지 9단지", sub:"신탁방식 / 한국자산신탁 사업시행자 지정", addr:"서울 양천구 신정동 323", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 4,050세대 (현재 2,040세대)", note:"정비구역 지정 완료. 한국자산신탁 사업시행자 지정 완료. 기존 2,040세대에서 대폭 증가 예정", updates:[{date:"2026-03-19",text:"한국자산신탁 사업시행자 지정 완료"}] },
-  { id:209, name:"목동신시가지 10단지", sub:"신탁방식 / 한국토지신탁 사업시행자 지정", addr:"서울 양천구 신정동 324", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고43층", far:"", use:"공동주택 4,050세대 (현재 2,160세대)", note:"정비구역 지정 완료. 한국토지신탁 사업시행자 지정 완료. 최고 43층", updates:[{date:"2026-03-19",text:"한국토지신탁 사업시행자 지정 완료"}] },
-  { id:210, name:"목동신시가지 11단지", sub:"신탁방식", addr:"서울 양천구 신정동 325", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고43층", far:"", use:"공동주택 3,483세대 (현재 1,790세대)", note:"정비구역 지정 완료. 신탁방식. 최고 43층", updates:[{date:"2026-03-19",text:"정비구역 지정 완료"}] },
-  { id:211, name:"목동신시가지 12단지", sub:"조합방식", addr:"서울 양천구 신정동 326", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 2,644세대 (현재 1,254세대)", note:"정비구역 지정 완료. 조합방식. 최고 49층", updates:[{date:"2026-03-19",text:"정비구역 지정 완료"}] },
-  { id:212, name:"목동신시가지 13단지", sub:"신탁방식 / 대신자산신탁 사업시행자 지정", addr:"서울 양천구 신정동 327", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 3,778세대 (현재 1,872세대)", note:"정비구역 지정 완료. 신탁 추진 단지 중 최초 사업시행자 지정(대신자산신탁). 기존 1,872세대에서 증가 예정", updates:[{date:"2026-03-19",text:"신탁 최초 사업시행자 지정 완료(대신자산신탁)"}] },
-  { id:213, name:"목동신시가지 14단지", sub:"신탁방식 / KB부동산신탁 사업시행자 지정", addr:"서울 양천구 신정동 328", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 5,123세대 (현재 2,520세대)", note:"KB부동산신탁 사업시행자 지정 완료. 부지 25만722㎡ 목동 최대 규모. 기존 2,520세대→5,123세대. DL이앤씨 수주 검토 중", updates:[{date:"2026-03-19",text:"KB부동산신탁 사업시행자 지정 완료 — 2,520→5,123세대, 부지 25만㎡"}] },
+  { id:200, name:"목동신시가지 1단지", sub:"신탁방식 (우리자산신탁)", addr:"서울 양천구 목동 916", district:"양천", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 3,500세대 (현재 1,882세대)", note:"2025.12.04 정비구역 지정 고시. 신탁방식. 기존 15층 1,882세대→49층 3,500세대. 목동그린웨이 조성 조건 3종 종상향. 9호선 신목동역 인접. 근린공원 1만500㎡ 신설", updates:[{date:"2026-03-19",text:"2025.12.04 정비구역 지정 — 1,882→3,500세대, 최고 49층"}] },
+  { id:201, name:"목동신시가지 2단지", sub:"신탁방식 (하나자산신탁)", addr:"서울 양천구 목동 920", district:"양천", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 3,389세대 (현재 1,640세대)", note:"2025.12.04 정비구역 지정 고시. 신탁방식. 기존 1,640세대→3,389세대. 파리공원·용왕산근린공원 녹지 특화", updates:[{date:"2026-03-19",text:"2025.12.04 정비구역 지정 — 1,640→3,389세대, 최고 49층"}] },
+  { id:202, name:"목동신시가지 3단지", sub:"조합방식 (주민투표 96.26%)", addr:"서울 양천구 목동 924", district:"양천", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 3,317세대 (현재 1,588세대)", note:"2025.12.04 정비구역 지정 고시. 조합방식. 기존 1,588세대→3,317세대. 근린공원 1만㎡ 조성", updates:[{date:"2026-03-19",text:"2025.12.04 정비구역 지정 — 1,588→3,317세대, 최고 49층"}] },
+  { id:203, name:"목동신시가지 4단지", sub:"조합방식", addr:"서울 양천구 목동 928", district:"양천", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 2,831세대 (현재 1,397세대)", note:"정비구역 지정 완료. 조합방식. 조합설립 추진위 구성 승인. 기존 1,397세대에서 대폭 증가 예정", updates:[{date:"2026-03-19",text:"정비구역 지정 완료 — 조합설립 추진위 승인"}] },
+  { id:204, name:"목동신시가지 5단지", sub:"신탁방식 / 사업시행자 지정 완료", addr:"서울 양천구 목동 932", district:"양천", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 2,770세대 (현재 1,342세대)", note:"정비구역 지정 완료. 신탁방식. 사업시행자 지정 완료(2025.12 고시). 기존 1,342세대에서 증가 예정", updates:[{date:"2026-03-19",text:"2025.12 사업시행자 지정 고시 완료"}] },
+  { id:205, name:"목동신시가지 6단지", sub:"조합방식 / 목동 최초 조합설립인가", addr:"서울 양천구 목동 936", district:"양천", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 2,173세대 (현재 1,316세대)", note:"목동 14개 단지 중 최초 조합설립인가(2025.5). 설계사 건원건축 선정(2025.8). 2026년 상반기 통합심의·시공사 선정 목표. 삼성물산·GS건설 등 수주 경쟁", updates:[{date:"2026-03-19",text:"2025.05 목동 최초 조합설립인가 — 시공사 선정 2026년 상반기 목표"}] },
+  { id:206, name:"목동신시가지 7단지", sub:"조합방식", addr:"서울 양천구 목동 940", district:"양천", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 3,153세대 (현재 1,554세대)", note:"정비구역 지정 완료. 조합방식. 목동역 남북 분리 단지. 기존 1,554세대에서 증가 예정", updates:[{date:"2026-03-19",text:"정비구역 지정 완료"}] },
+  { id:207, name:"목동신시가지 8단지", sub:"신탁방식", addr:"서울 양천구 신정동 322", district:"양천", category:"주거", status:"plan", phase:"계획", floors:"최고43층", far:"", use:"공동주택 2,659세대 (현재 1,320세대)", note:"정비구역 지정 완료. 신탁방식. 신정동 소재 뒷단지군. 최고 43층", updates:[{date:"2026-03-19",text:"정비구역 지정 완료, 최고 43층"}] },
+  { id:208, name:"목동신시가지 9단지", sub:"신탁방식 / 한국자산신탁 사업시행자 지정", addr:"서울 양천구 신정동 323", district:"양천", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 4,050세대 (현재 2,040세대)", note:"정비구역 지정 완료. 한국자산신탁 사업시행자 지정 완료. 기존 2,040세대에서 대폭 증가 예정", updates:[{date:"2026-03-19",text:"한국자산신탁 사업시행자 지정 완료"}] },
+  { id:209, name:"목동신시가지 10단지", sub:"신탁방식 / 한국토지신탁 사업시행자 지정", addr:"서울 양천구 신정동 324", district:"양천", category:"주거", status:"plan", phase:"계획", floors:"최고43층", far:"", use:"공동주택 4,050세대 (현재 2,160세대)", note:"정비구역 지정 완료. 한국토지신탁 사업시행자 지정 완료. 최고 43층", updates:[{date:"2026-03-19",text:"한국토지신탁 사업시행자 지정 완료"}] },
+  { id:210, name:"목동신시가지 11단지", sub:"신탁방식", addr:"서울 양천구 신정동 325", district:"양천", category:"주거", status:"plan", phase:"계획", floors:"최고43층", far:"", use:"공동주택 3,483세대 (현재 1,790세대)", note:"정비구역 지정 완료. 신탁방식. 최고 43층", updates:[{date:"2026-03-19",text:"정비구역 지정 완료"}] },
+  { id:211, name:"목동신시가지 12단지", sub:"조합방식", addr:"서울 양천구 신정동 326", district:"양천", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 2,644세대 (현재 1,254세대)", note:"정비구역 지정 완료. 조합방식. 최고 49층", updates:[{date:"2026-03-19",text:"정비구역 지정 완료"}] },
+  { id:212, name:"목동신시가지 13단지", sub:"신탁방식 / 대신자산신탁 사업시행자 지정", addr:"서울 양천구 신정동 327", district:"양천", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 3,778세대 (현재 1,872세대)", note:"정비구역 지정 완료. 신탁 추진 단지 중 최초 사업시행자 지정(대신자산신탁). 기존 1,872세대에서 증가 예정", updates:[{date:"2026-03-19",text:"신탁 최초 사업시행자 지정 완료(대신자산신탁)"}] },
+  { id:213, name:"목동신시가지 14단지", sub:"신탁방식 / KB부동산신탁 사업시행자 지정", addr:"서울 양천구 신정동 328", district:"양천", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 5,123세대 (현재 2,520세대)", note:"KB부동산신탁 사업시행자 지정 완료. 부지 25만722㎡ 목동 최대 규모. 기존 2,520세대→5,123세대. DL이앤씨 수주 검토 중", updates:[{date:"2026-03-19",text:"KB부동산신탁 사업시행자 지정 완료 — 2,520→5,123세대, 부지 25만㎡"}] },
 ];
 
 var curSt = 'all', curCat = 'all', curDist = 'all';
 var STATUS_LABEL = {done:'준공',demo:'철거중',wip:'공사중',plan:'계획중'};
 var STATUS_CLASS = {done:'b-done',demo:'b-demo',wip:'b-wip',plan:'b-plan'};
 var STATUS_ORDER = {wip:0,demo:1,plan:2,done:3};
-var DIST_ORDER = {'CBD시청':0,'CBD종로':1,'CBD을지로':2,'YBD':3,'마포':4,'용산':5,'한남':6,'흑석':7,'노량진':8,'강남':9,'성수':10,'기타':11};
+var DIST_ORDER = {'CBD시청':0,'CBD종로':1,'CBD을지로':2,'YBD':3,'마포':4,'용산':5,'한남':6,'흑석':7,'노량진':8,'강남':9,'성수':10,'양천':11,'기타':12};
 
 function setSt(v,el) { curSt=v; document.querySelectorAll('.filter-group .pill').forEach(function(b){if(b.onclick.toString().includes('setSt'))b.classList.remove('active')}); el.classList.add('active'); doRender(); }
 function setCat(v,el) { curCat=v; document.querySelectorAll('.filter-group .pill').forEach(function(b){if(b.onclick.toString().includes('setCat'))b.classList.remove('active')}); el.classList.add('active'); doRender(); }
