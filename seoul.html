@@ -5,178 +5,148 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>서울 정비사업 탐색기</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #f7f6f3;
-    --surface: #ffffff;
-    --border: #e4e2db;
-    --border2: #ccc9be;
-    --text: #1a1916;
-    --text2: #5c5a54;
-    --text3: #9c9a93;
-    --accent: #2c5f2e;
-    --accent-light: #eaf3de;
-    --font: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-  }
-  body { background: var(--bg); font-family: var(--font); color: var(--text); min-height: 100vh; }
-
-  /* HEADER */
-  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 20px; position: sticky; top: 0; z-index: 100; }
-  .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-  .logo { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
-  .logo span { color: var(--accent); }
-  .count-badge { background: var(--accent-light); color: var(--accent); font-size: 12px; padding: 2px 8px; border-radius: 99px; font-weight: 600; }
-  .search-wrap { position: relative; }
-  .search-wrap input { width: 100%; padding: 9px 12px 9px 36px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); font-size: 14px; color: var(--text); outline: none; font-family: var(--font); }
-  .search-wrap input:focus { border-color: var(--accent); background: var(--surface); }
-  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 15px; pointer-events: none; }
-
-  /* FILTERS */
-  .filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
-  .filter-group { display: flex; gap: 4px; flex-wrap: wrap; }
-  .filter-sep { width: 1px; background: var(--border); margin: 0 2px; }
-  .pill { padding: 5px 11px; border-radius: 99px; border: 1px solid var(--border); background: var(--surface); font-size: 12px; cursor: pointer; color: var(--text2); transition: all 0.12s; font-family: var(--font); white-space: nowrap; }
-  .pill:hover { border-color: var(--border2); color: var(--text); }
-  .pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .pill.s-done.active { background: #1D9E75; border-color: #1D9E75; }
-  .pill.s-demo.active { background: #E24B4A; border-color: #E24B4A; }
-  .pill.s-wip.active { background: #BA7517; border-color: #BA7517; }
-  .pill.s-plan.active { background: #378ADD; border-color: #378ADD; }
-
-  /* TABS */
-  .tabs { display: flex; gap: 0; padding: 0 20px; background: var(--surface); border-bottom: 1px solid var(--border); }
-  .tab { padding: 10px 16px; font-size: 13px; cursor: pointer; color: var(--text3); border-bottom: 2px solid transparent; transition: all 0.12s; font-family: var(--font); }
-  .tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
-  .naver-btn { display: inline-flex; align-items: center; gap: 4px; margin-top: 10px; padding: 5px 10px; background: #03C75A; color: white; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; }
-  .naver-btn:hover { background: #02b350; }
-
-  /* MAIN */
-  .main { padding: 16px 20px; max-width: 1100px; margin: 0 auto; }
-  .result-info { font-size: 12px; color: var(--text3); margin-bottom: 12px; }
-
-  /* CARDS */
-  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: border-color 0.12s, box-shadow 0.12s; }
-  .card:hover { border-color: var(--border2); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
-  .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
-  .card-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; flex: 1; }
-  .card-sub { font-size: 11px; color: var(--text3); margin-bottom: 6px; }
-  .card-addr { font-size: 11px; color: var(--text3); margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
-  .card-tags { display: flex; flex-wrap: wrap; gap: 4px; }
-  .tag { font-size: 11px; padding: 2px 7px; border-radius: 4px; background: var(--bg); color: var(--text2); border: 1px solid var(--border); }
-  .badge { font-size: 10px; padding: 2px 7px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; font-weight: 600; }
-  .b-done { background: #eaf3de; color: #1D9E75; }
-  .b-demo { background: #fcebeb; color: #E24B4A; }
-  .b-wip  { background: #faeeda; color: #BA7517; }
-  .b-plan { background: #e6f1fb; color: #378ADD; }
-  .district-tag { font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 500; }
-  .d-CBD시청 { background: #EEEDFE; color: #534AB7; }
-  .d-CBD종로 { background: #DDD8FD; color: #3B318F; }
-  .d-CBD을지로 { background: #FAEEDA; color: #854F0B; }
-  .d-YBD { background: #FBEAF0; color: #993556; }
-  .d-마포 { background: #E1F5EE; color: #0F6E56; }
-  .d-용산 { background: #FAECE7; color: #993C1D; }
-  .d-노량진 { background: #EAF3DE; color: #3B6D11; }
-  .d-흑석 { background: #F1EFE8; color: #5F5E5A; }
-  .d-한남 { background: #FCEBEB; color: #A32D2D; }
-  .d-강남 { background: #E6F1FB; color: #185FA5; }
-  .d-성수 { background: #FBEAF0; color: #72243E; }
-  .d-기타 { background: #F1EFE8; color: #5F5E5A; }
-  .cat-주거 { font-size: 13px; }
-  .cat-상업 { font-size: 13px; }
-  .phase-badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; background: #f0edf8; color: #534AB7; font-weight: 600; border: 1px solid #d8d3f5; white-space: nowrap; }
-  .year-tag { font-size: 10px; padding: 2px 7px; border-radius: 4px; background: #f5f0ff; color: #6B3FA0; border: 1px solid #ddd5f5; font-weight: 600; white-space: nowrap; }
-
-  /* MAP - 네이버 지도 버튼 */
-
-  /* EMPTY */
-  .empty { text-align: center; padding: 4rem 2rem; color: var(--text3); }
-  .empty-icon { font-size: 36px; margin-bottom: 12px; }
-
-  /* DETAIL MODAL */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
-  .modal-overlay.open { display: flex; }
-  .modal { background: var(--surface); border-radius: 16px; max-width: 520px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 24px; }
-  .modal-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-  .modal-name { font-size: 16px; font-weight: 700; line-height: 1.4; flex: 1; }
-  .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text3); padding: 0 4px; }
-  .modal-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-  .modal-section { margin-bottom: 14px; }
-  .modal-label { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-  .modal-value { font-size: 13px; color: var(--text); line-height: 1.6; }
-  
-
-  .modal-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f7f6f3; --surface: #fff; --border: #e4e2db; --border2: #ccc9be;
+  --text: #1a1916; --text2: #5c5a54; --text3: #9c9a93;
+  --accent: #2c5f2e; --accent-light: #eaf3de;
+  --font: "Pretendard","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+}
+body { background:var(--bg); font-family:var(--font); color:var(--text); min-height:100vh; }
+.header { background:var(--surface); border-bottom:1px solid var(--border); padding:16px 20px; position:sticky; top:0; z-index:100; }
+.header-top { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.logo { font-size:18px; font-weight:700; letter-spacing:-0.5px; }
+.logo span { color:var(--accent); }
+.count-badge { background:var(--accent-light); color:var(--accent); font-size:12px; padding:2px 8px; border-radius:99px; font-weight:600; }
+.search-wrap { position:relative; }
+.search-wrap input { width:100%; padding:9px 12px 9px 36px; border:1px solid var(--border); border-radius:8px; background:var(--bg); font-size:14px; color:var(--text); outline:none; font-family:var(--font); }
+.search-wrap input:focus { border-color:var(--accent); background:var(--surface); }
+.search-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--text3); font-size:15px; pointer-events:none; }
+.filter-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+.filter-group { display:flex; gap:4px; flex-wrap:wrap; }
+.filter-sep { width:1px; background:var(--border); margin:0 4px; }
+.pill { padding:5px 11px; border-radius:99px; border:1px solid var(--border); background:var(--surface); font-size:12px; cursor:pointer; color:var(--text2); transition:all .12s; font-family:var(--font); white-space:nowrap; }
+.pill:hover { border-color:var(--border2); color:var(--text); }
+.pill.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.pill.s-done.active { background:#1D9E75; border-color:#1D9E75; }
+.pill.s-demo.active { background:#E24B4A; border-color:#E24B4A; }
+.pill.s-wip.active  { background:#BA7517; border-color:#BA7517; }
+.pill.s-plan.active { background:#378ADD; border-color:#378ADD; }
+.sort-bar { display:flex; align-items:center; gap:6px; padding:8px 20px; background:var(--surface); border-bottom:1px solid var(--border); }
+.sort-bar span { font-size:11px; color:var(--text3); margin-left:auto; }
+.sort-bar select { font-size:12px; padding:4px 8px; border:1px solid var(--border); border-radius:6px; background:var(--surface); color:var(--text); font-family:var(--font); cursor:pointer; outline:none; }
+.main { padding:16px 20px; max-width:1100px; margin:0 auto; }
+.result-info { font-size:12px; color:var(--text3); margin-bottom:12px; }
+.cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:10px; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; cursor:pointer; transition:border-color .12s,box-shadow .12s; }
+.card:hover { border-color:var(--border2); box-shadow:0 2px 12px rgba(0,0,0,.06); }
+.card-head { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px; }
+.card-name { font-size:13px; font-weight:600; color:var(--text); line-height:1.4; flex:1; }
+.card-sub { font-size:11px; color:var(--text3); margin-bottom:6px; }
+.card-addr { font-size:11px; color:var(--text3); margin-bottom:8px; }
+.card-tags { display:flex; flex-wrap:wrap; gap:4px; }
+.tag { font-size:11px; padding:2px 7px; border-radius:4px; background:var(--bg); color:var(--text2); border:1px solid var(--border); }
+.badge { font-size:10px; padding:2px 7px; border-radius:99px; white-space:nowrap; flex-shrink:0; font-weight:600; }
+.b-done { background:#eaf3de; color:#1D9E75; }
+.b-demo { background:#fcebeb; color:#E24B4A; }
+.b-wip  { background:#faeeda; color:#BA7517; }
+.b-plan { background:#e6f1fb; color:#378ADD; }
+.district-tag { font-size:10px; padding:2px 7px; border-radius:4px; font-weight:500; }
+.d-CBD시청,.d-CBD종로 { background:#EEEDFE; color:#534AB7; }
+.d-CBD을지로 { background:#FAEEDA; color:#854F0B; }
+.d-YBD  { background:#FBEAF0; color:#993556; }
+.d-마포  { background:#E1F5EE; color:#0F6E56; }
+.d-용산  { background:#FAECE7; color:#993C1D; }
+.d-노량진 { background:#EAF3DE; color:#3B6D11; }
+.d-흑석  { background:#F1EFE8; color:#5F5E5A; }
+.d-한남  { background:#FCEBEB; color:#A32D2D; }
+.d-강남  { background:#E6F1FB; color:#185FA5; }
+.d-성수  { background:#FBEAF0; color:#72243E; }
+.d-기타  { background:#F1EFE8; color:#5F5E5A; }
+.phase-badge { font-size:10px; padding:2px 8px; border-radius:4px; background:#f0edf8; color:#534AB7; font-weight:600; border:1px solid #d8d3f5; white-space:nowrap; }
+.year-tag { font-size:10px; padding:2px 7px; border-radius:4px; background:#f5f0ff; color:#6B3FA0; border:1px solid #ddd5f5; font-weight:600; white-space:nowrap; }
+.naver-btn { display:inline-flex; align-items:center; gap:4px; margin-top:10px; padding:5px 10px; background:#03C75A; color:white; border-radius:6px; font-size:11px; font-weight:600; text-decoration:none; border:none; cursor:pointer; }
+.naver-btn:hover { background:#02b350; }
+.empty { text-align:center; padding:4rem 2rem; color:var(--text3); }
+.empty-icon { font-size:36px; margin-bottom:12px; }
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:200; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--surface); border-radius:16px; max-width:520px; width:100%; max-height:80vh; overflow-y:auto; padding:24px; }
+.modal-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; }
+.modal-name { font-size:18px; font-weight:700; line-height:1.3; flex:1; }
+.modal-close { background:none; border:none; font-size:20px; cursor:pointer; color:var(--text3); padding:0 0 0 12px; }
+.modal-badges { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+.modal-section { margin-bottom:12px; }
+.modal-label { font-size:11px; color:var(--text3); font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+.modal-value { font-size:14px; color:var(--text); line-height:1.6; }
+.modal-divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <div class="header-top">
-    <div class="logo">서울 <span>정비사업</span> 탐색기 <span style="font-size:13px;font-weight:500;color:var(--text3)">by 수미숨</span></div>
-    <div class="count-badge" id="totalBadge">0건</div>
-    <a href="https://blog.naver.com/sum7788" target="_blank" style="margin-left:auto;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--accent);color:#fff;border-radius:99px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap">✍️ 수미숨 블로그</a>
+    <div class="logo">서울 <span>정비사업</span> 탐색기</div>
+    <span class="count-badge" id="totalBadge">0건</span>
+    <a href="https://sum7788.tistory.com" target="_blank" style="margin-left:auto;background:#2c5f2e;color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;text-decoration:none;">🌿 수미숨 블로그</a>
   </div>
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="구역명, 주소, 건물명, 시공사 검색..." oninput="render()" />
+    <input id="searchInput" type="text" placeholder="구역명, 주소, 건물명, 시공사 검색..." oninput="doRender()">
   </div>
   <div class="filter-row">
     <div class="filter-group">
-      <button class="pill active" data-s="all" onclick="setStatus('all',this)">전체</button>
-      <button class="pill s-done" data-s="done" onclick="setStatus('done',this)">🏬 준공</button>
-      <button class="pill s-demo" data-s="demo" onclick="setStatus('demo',this)">⛓️ 철거중</button>
-      <button class="pill s-wip" data-s="wip" onclick="setStatus('wip',this)">🏗️ 공사중</button>
-      <button class="pill s-plan" data-s="plan" onclick="setStatus('plan',this)">📝 계획중</button>
+      <button class="pill active s-all" onclick="setSt('all',this)">전체</button>
+      <button class="pill s-done" onclick="setSt('done',this)">🏬 준공</button>
+      <button class="pill s-demo" onclick="setSt('demo',this)">⛓️ 철거중</button>
+      <button class="pill s-wip"  onclick="setSt('wip',this)">🏗️ 공사중</button>
+      <button class="pill s-plan" onclick="setSt('plan',this)">📝 계획중</button>
     </div>
     <div class="filter-sep"></div>
     <div class="filter-group">
-      <button class="pill active" data-c="all" onclick="setCategory('all',this)">전체</button>
-      <button class="pill" data-c="상업" onclick="setCategory('상업',this)">🏢 상업</button>
-      <button class="pill" data-c="주거" onclick="setCategory('주거',this)">🏠 주거</button>
+      <button class="pill active" onclick="setCat('all',this)">전체</button>
+      <button class="pill" onclick="setCat('상업',this)">🏢 상업</button>
+      <button class="pill" onclick="setCat('주거',this)">🏠 주거</button>
     </div>
     <div class="filter-sep"></div>
     <div class="filter-group">
-      <button class="pill active" data-d="all" onclick="setDistrict('all',this)">전 지역</button>
-      <button class="pill" data-d="CBD시청" onclick="setDistrict('CBD시청',this)">CBD(서울역/시청)</button>
-      <button class="pill" data-d="CBD종로" onclick="setDistrict('CBD종로',this)">CBD(광화문/종로)</button>
-      <button class="pill" data-d="CBD을지로" onclick="setDistrict('CBD을지로',this)">CBD(을지로)</button>
-      <button class="pill" data-d="YBD" onclick="setDistrict('YBD',this)">YBD</button>
-      <button class="pill" data-d="마포" onclick="setDistrict('마포',this)">마포</button>
-      <button class="pill" data-d="용산" onclick="setDistrict('용산',this)">용산</button>
-      <button class="pill" data-d="한남" onclick="setDistrict('한남',this)">한남</button>
-      <button class="pill" data-d="흑석" onclick="setDistrict('흑석',this)">흑석</button>
-      <button class="pill" data-d="노량진" onclick="setDistrict('노량진',this)">노량진</button>
-      <button class="pill" data-d="강남" onclick="setDistrict('강남',this)">강남</button>
-      <button class="pill" data-d="성수" onclick="setDistrict('성수',this)">성수</button>
-      <button class="pill" data-d="기타" onclick="setDistrict('기타',this)">기타</button>
+      <button class="pill active" onclick="setDist('all',this)">전 지역</button>
+      <button class="pill" onclick="setDist('CBD시청',this)">CBD(서울역/시청)</button>
+      <button class="pill" onclick="setDist('CBD종로',this)">CBD(광화문/종로)</button>
+      <button class="pill" onclick="setDist('CBD을지로',this)">CBD(을지로)</button>
+      <button class="pill" onclick="setDist('YBD',this)">YBD</button>
+      <button class="pill" onclick="setDist('마포',this)">마포</button>
+      <button class="pill" onclick="setDist('용산',this)">용산</button>
+      <button class="pill" onclick="setDist('한남',this)">한남</button>
+      <button class="pill" onclick="setDist('흑석',this)">흑석</button>
+      <button class="pill" onclick="setDist('노량진',this)">노량진</button>
+      <button class="pill" onclick="setDist('강남',this)">강남</button>
+      <button class="pill" onclick="setDist('성수',this)">성수</button>
+      <button class="pill" onclick="setDist('기타',this)">기타</button>
     </div>
   </div>
 </div>
 
-<div class="tabs">
-  <div class="tab active" onclick="setTab('card',this)">카드 보기</div>
-
-  <div style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:0 8px">
-    <span style="font-size:11px;color:var(--text3)">정렬</span>
-    <select id="sortSelect" onchange="render()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-family:var(--font);cursor:pointer;outline:none">
-      <option value="default">기본</option>
-      <option value="district">지역순</option>
-      <option value="status">상태순</option>
-      <option value="year">준공연도순</option>
-    </select>
-  </div>
+<div style="display:flex;align-items:center;gap:6px;padding:8px 20px;background:var(--surface);border-bottom:1px solid var(--border);">
+  <div class="result-info" id="resultInfo" style="margin:0"></div>
+  <span style="margin-left:auto;font-size:11px;color:var(--text3)">정렬</span>
+  <select id="sortSel" onchange="doRender()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-family:var(--font);cursor:pointer;outline:none;">
+    <option value="default">기본</option>
+    <option value="district">지역순</option>
+    <option value="status">상태순</option>
+    <option value="year">준공연도순</option>
+  </select>
 </div>
 
 <div class="main">
-  <div class="result-info" id="resultInfo"></div>
   <div id="cardView" class="cards"></div>
+</div>
 
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-  <div class="modal" id="modalBox">
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
     <div class="modal-head">
       <div class="modal-name" id="mName"></div>
-      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+      <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-badges" id="mBadges"></div>
     <div id="mBody"></div>
@@ -342,149 +312,106 @@ const DATA = [
   { id:213, name:"목동신시가지 14단지 재건축", sub:"신탁방식 / 사업시행자 지정 완료 (KB부동산신탁)", addr:"서울 양천구 신정동 328", district:"기타", category:"주거", status:"plan", phase:"계획", floors:"최고49층", far:"", use:"공동주택 5,123세대 (기존 2,520세대) — 14개 단지 중 최대", note:"정비구역 지정 완료. KB부동산신탁 사업시행자 지정 완료. 부지 25만722㎡ — 목동 최대 규모. DL이앤씨 수주 검토 중", updates:[{date:"2026-03-19",text:"KB부동산신탁 사업시행자 지정 완료 — 목동 최대 단지(5,123세대, 부지 25만㎡)"}] },
 ];
 
+var curSt = 'all', curCat = 'all', curDist = 'all';
+var STATUS_LABEL = {done:'준공',demo:'철거중',wip:'공사중',plan:'계획중'};
+var STATUS_CLASS = {done:'b-done',demo:'b-demo',wip:'b-wip',plan:'b-plan'};
+var STATUS_ORDER = {wip:0,demo:1,plan:2,done:3};
+var DIST_ORDER = {'CBD시청':0,'CBD종로':1,'CBD을지로':2,'YBD':3,'마포':4,'용산':5,'한남':6,'흑석':7,'노량진':8,'강남':9,'성수':10,'기타':11};
 
-const STATUS_LABEL = { done:"준공", demo:"철거중", wip:"공사중", plan:"계획중" };
-const STATUS_CLASS = { done:"b-done", demo:"b-demo", wip:"b-wip", plan:"b-plan" };
+function setSt(v,el) { curSt=v; document.querySelectorAll('.filter-group .pill').forEach(function(b){if(b.onclick.toString().includes('setSt'))b.classList.remove('active')}); el.classList.add('active'); doRender(); }
+function setCat(v,el) { curCat=v; document.querySelectorAll('.filter-group .pill').forEach(function(b){if(b.onclick.toString().includes('setCat'))b.classList.remove('active')}); el.classList.add('active'); doRender(); }
+function setDist(v,el) { curDist=v; document.querySelectorAll('.filter-group .pill').forEach(function(b){if(b.onclick.toString().includes('setDist'))b.classList.remove('active')}); el.classList.add('active'); doRender(); }
 
-let currentStatus = "all";
-let currentDistrict = "all";
-let currentCategory = "all";
-let currentTab = "card";
-
-window.setStatus = function(v, el) {
-  currentStatus = v;
-  document.querySelectorAll('[data-s]').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  render();
-}
-window.setCategory = function(v, el) {
-  currentCategory = v;
-  document.querySelectorAll('[data-c]').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  render();
-}
-window.setDistrict = function(v, el) {
-  currentDistrict = v;
-  document.querySelectorAll('[data-d]').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  render();
-}
-window.setTab = function(t, el) {
-  currentTab = t;
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  render();
-}
-
-
-const STATUS_ORDER = { wip:0, demo:1, plan:2, done:3 };
-const DISTRICT_ORDER = { 'CBD시청':0,'CBD종로':1,'CBD을지로':2,'YBD':3,'마포':4,'용산':5,'한남':6,'흑석':7,'노량진':8,'강남':9,'성수':10,'기타':11 };
-
-window.filtered = function() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  const sort = document.getElementById('sortSelect')?.value || 'default';
-  let list = DATA.filter(d => {
-    const ms = currentStatus === 'all' || d.status === currentStatus;
-    const md = currentDistrict === 'all' || d.district === currentDistrict;
-    const mc = currentCategory === 'all' || d.category === currentCategory;
-    const mq = !q || [d.name,d.sub,d.addr,d.use,d.note,d.phase||''].join(' ').toLowerCase().includes(q);
-    return ms && md && mc && mq;
+function getFiltered() {
+  var q = document.getElementById('searchInput').value.toLowerCase();
+  var sort = document.getElementById('sortSel').value;
+  var list = DATA.filter(function(d) {
+    var ms = curSt==='all' || d.status===curSt;
+    var mc = curCat==='all' || d.category===curCat;
+    var md = curDist==='all' || d.district===curDist;
+    var mq = !q || [d.name,d.sub||'',d.addr,d.use||'',d.note||'',d.phase||''].join(' ').toLowerCase().indexOf(q)>=0;
+    return ms && mc && md && mq;
   });
-  if (sort === 'district') list.sort((a,b) => (DISTRICT_ORDER[a.district]??99)-(DISTRICT_ORDER[b.district]??99));
-  else if (sort === 'status') list.sort((a,b) => (STATUS_ORDER[a.status]??99)-(STATUS_ORDER[b.status]??99));
-  else if (sort === 'year') list.sort((a,b) => {
-    const ya = parseInt(a.note?.match(/20\d\d/)?.[0])||9999;
-    const yb = parseInt(b.note?.match(/20\d\d/)?.[0])||9999;
-    return ya - yb;
+  if(sort==='district') list.sort(function(a,b){return (DIST_ORDER[a.district]||99)-(DIST_ORDER[b.district]||99);});
+  else if(sort==='status') list.sort(function(a,b){return (STATUS_ORDER[a.status]||99)-(STATUS_ORDER[b.status]||99);});
+  else if(sort==='year') list.sort(function(a,b){
+    var ya=parseInt((a.note||'').match(/20\d\d/)||9999); var yb=parseInt((b.note||'').match(/20\d\d/)||9999); return ya-yb;
   });
   return list;
 }
 
-window.render = function() {
-  const list = filtered();
-  document.getElementById('totalBadge').textContent = DATA.length + '건';
-  document.getElementById('resultInfo').textContent = `${list.length}건 표시 중 (전체 ${DATA.length}건)`;
-  renderCards(list);
+function naverUrl(addr) { return 'https://map.naver.com/v5/search/'+encodeURIComponent(addr); }
+
+function doRender() {
+  var list = getFiltered();
+  document.getElementById('totalBadge').textContent = DATA.length+'건';
+  document.getElementById('resultInfo').textContent = list.length+'건 표시 중 (전체 '+DATA.length+'건)';
+  var wrap = document.getElementById('cardView');
+  if(!list.length) { wrap.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div>검색 결과가 없습니다</div></div>'; return; }
+  wrap.innerHTML = list.map(function(d) {
+    var ym = ([d.note||'',d.use||''].join(' ')).match(/준공\s*(\d{4})|(\d{4})[년\s]*준공|입주\s*(\d{4})|(\d{4})[년\s]*입주/);
+    var yr = ym ? (ym[1]||ym[2]||ym[3]||ym[4]) : null;
+    return '<div class="card" onclick="openModal('+d.id+')">'+
+      '<div class="card-head">'+
+        '<div class="card-name">'+(d.category==='주거'?'🏠':'🏢')+' '+d.name+'</div>'+
+        '<div class="badge '+STATUS_CLASS[d.status]+'">'+STATUS_LABEL[d.status]+'</div>'+
+      '</div>'+
+      (d.sub?'<div class="card-sub">'+d.sub+'</div>':'')+
+      '<div class="card-addr">📍 '+d.addr+'</div>'+
+      '<div class="card-tags">'+
+        '<span class="district-tag d-'+d.district+'">'+d.district+'</span>'+
+        (d.phase?'<span class="phase-badge">'+d.phase+'</span>':'')+
+        (yr?'<span class="year-tag">🏁 '+yr+'</span>':'')+
+        (d.floors?'<span class="tag">'+d.floors+'</span>':'')+
+        (d.use?'<span class="tag">'+(d.use.length>18?d.use.slice(0,18)+'…':d.use)+'</span>':'')+
+        (d.far?'<span class="tag">용적률 '+d.far+'</span>':'')+
+      '</div>'+
+      '<a class="naver-btn" href="'+naverUrl(d.addr)+'" target="_blank" onclick="event.stopPropagation()">'+
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>'+
+        '네이버 지도</a>'+
+    '</div>';
+  }).join('');
 }
 
-window.naverMapUrl = function(addr) {
-  return 'https://map.naver.com/v5/search/' + encodeURIComponent(addr);
-}
-
-window.renderCards = function(list) {
-  const wrap = document.getElementById('cardView');
-  if (!list.length) {
-    wrap.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🔍</div><div>검색 결과가 없습니다</div></div>';
-    return;
-  }
-  wrap.innerHTML = list.map(d => {
-    const yearMatch = [d.note, d.use].join(' ').match(/준공\s*(\d{4})|(\d{4})[년\s]*준공|입주\s*(\d{4})|(\d{4})[년\s]*입주/);
-    const year = yearMatch ? (yearMatch[1]||yearMatch[2]||yearMatch[3]||yearMatch[4]) : null;
-    return `
-    <div class="card" onclick="openModal(${d.id})">
-      <div class="card-head">
-        <div class="card-name">${d.category === '주거' ? '🏠' : '🏢'} ${d.name}</div>
-        <div class="badge ${STATUS_CLASS[d.status]}">${STATUS_LABEL[d.status]}</div>
-      </div>
-      ${d.sub ? `<div class="card-sub">${d.sub}</div>` : ''}
-      <div class="card-addr">📍 ${d.addr}</div>
-      <div class="card-tags">
-        <span class="district-tag d-${d.district}">${d.district}</span>
-        ${d.phase ? `<span class="phase-badge">${d.phase}</span>` : ''}
-        ${year ? `<span class="year-tag">🏁 ${year}</span>` : ''}
-        ${d.floors ? `<span class="tag">${d.floors}</span>` : ''}
-        ${d.use ? `<span class="tag">${d.use.length > 18 ? d.use.slice(0,18)+'…' : d.use}</span>` : ''}
-        ${d.far ? `<span class="tag">용적률 ${d.far}</span>` : ''}
-      </div>
-      <a class="naver-btn" href="${naverMapUrl(d.addr)}" target="_blank" onclick="event.stopPropagation()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-        네이버 지도
-      </a>
-    </div>
-  `}).join('');
-}
-
-window.openModal = function(id) {
-  const d = DATA.find(x => x.id === id);
-  if (!d) return;
+function openModal(id) {
+  var d = DATA.filter(function(x){return x.id===id;})[0];
+  if(!d) return;
   document.getElementById('mName').textContent = d.name;
-  document.getElementById('mBadges').innerHTML = `
-    <span class="badge ${STATUS_CLASS[d.status]}" style="font-size:12px;padding:4px 10px">${STATUS_LABEL[d.status]}</span>
-    <span style="font-size:12px;padding:4px 10px;background:${d.category==='주거'?'#eaf3de':'#e6f1fb'};color:${d.category==='주거'?'#1D9E75':'#185FA5'};border-radius:99px;font-weight:600">${d.category==='주거'?'🏠 주거':'🏢 상업'}</span>
-    ${d.phase ? `<span class="phase-badge" style="font-size:12px;padding:4px 10px">${d.phase}</span>` : ''}
-    <span class="district-tag d-${d.district}" style="font-size:12px;padding:4px 10px">${d.district}</span>
-  `;
-  let body = '';
-  if (d.sub) body += `<div class="modal-section"><div class="modal-label">별칭</div><div class="modal-value">${d.sub}</div></div>`;
-  if (d.addr) body += `<div class="modal-section"><div class="modal-label">위치</div><div class="modal-value">${d.addr}<br><a class="naver-btn" href="${naverMapUrl(d.addr)}" target="_blank" style="margin-top:6px;display:inline-flex"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> 네이버 지도에서 보기</a></div></div>`;
-  if (d.floors) body += `<div class="modal-section"><div class="modal-label">규모</div><div class="modal-value">${d.floors}</div></div>`;
-  if (d.far) body += `<div class="modal-section"><div class="modal-label">용적률</div><div class="modal-value">${d.far}</div></div>`;
-  if (d.use) body += `<div class="modal-section"><div class="modal-label">용도</div><div class="modal-value">${d.use}</div></div>`;
-  if (d.note) body += `<hr class="modal-divider"><div class="modal-section"><div class="modal-label">비고</div><div class="modal-value">${d.note}</div></div>`;
-  if (d.updates && d.updates.length) {
-    body += `<hr class="modal-divider"><div class="modal-section"><div class="modal-label">업데이트 히스토리</div><div style="margin-top:8px;display:flex;flex-direction:column;gap:0">`;
-    [...d.updates].reverse().forEach((u, i) => {
-      const isLast = i === d.updates.length - 1;
-      body += `<div style="display:flex;gap:12px;position:relative">
-        <div style="display:flex;flex-direction:column;align-items:center;width:16px;flex-shrink:0">
-          <div style="width:9px;height:9px;border-radius:50%;background:var(--accent);margin-top:3px;flex-shrink:0"></div>
-          ${!isLast ? `<div style="width:1px;flex:1;background:var(--border);margin:3px 0"></div>` : ''}
-        </div>
-        <div style="padding-bottom:12px">
-          <div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:2px">${u.date}</div>
-          <div style="font-size:13px;color:var(--text);line-height:1.5">${u.text}</div>
-        </div>
-      </div>`;
+  document.getElementById('mBadges').innerHTML =
+    '<span class="badge '+STATUS_CLASS[d.status]+'" style="font-size:12px;padding:4px 10px">'+STATUS_LABEL[d.status]+'</span>'+
+    '<span style="font-size:12px;padding:4px 10px;background:'+(d.category==='주거'?'#eaf3de':'#e6f1fb')+';color:'+(d.category==='주거'?'#1D9E75':'#185FA5')+';border-radius:99px;font-weight:600">'+(d.category==='주거'?'🏠 주거':'🏢 상업')+'</span>'+
+    (d.phase?'<span class="phase-badge" style="font-size:12px;padding:4px 10px">'+d.phase+'</span>':'')+
+    '<span class="district-tag d-'+d.district+'" style="font-size:12px;padding:4px 10px">'+d.district+'</span>';
+  var body = '';
+  if(d.sub) body+='<div class="modal-section"><div class="modal-label">별칭</div><div class="modal-value">'+d.sub+'</div></div>';
+  if(d.addr) body+='<div class="modal-section"><div class="modal-label">위치</div><div class="modal-value">'+d.addr+'<br><a class="naver-btn" href="'+naverUrl(d.addr)+'" target="_blank" style="margin-top:6px;display:inline-flex"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> 네이버 지도에서 보기</a></div></div>';
+  if(d.floors) body+='<div class="modal-section"><div class="modal-label">규모</div><div class="modal-value">'+d.floors+'</div></div>';
+  if(d.far) body+='<div class="modal-section"><div class="modal-label">용적률</div><div class="modal-value">'+d.far+'</div></div>';
+  if(d.use) body+='<div class="modal-section"><div class="modal-label">용도</div><div class="modal-value">'+d.use+'</div></div>';
+  if(d.note) body+='<hr class="modal-divider"><div class="modal-section"><div class="modal-label">비고</div><div class="modal-value">'+d.note+'</div></div>';
+  if(d.updates && d.updates.length) {
+    body+='<hr class="modal-divider"><div class="modal-section"><div class="modal-label">업데이트 히스토리</div><div style="margin-top:8px">';
+    var rev = d.updates.slice().reverse();
+    rev.forEach(function(u,i){
+      body+='<div style="display:flex;gap:12px;position:relative">'+
+        '<div style="display:flex;flex-direction:column;align-items:center;width:16px;flex-shrink:0">'+
+          '<div style="width:9px;height:9px;border-radius:50%;background:var(--accent);margin-top:3px;flex-shrink:0"></div>'+
+          (i<rev.length-1?'<div style="width:1px;flex:1;background:var(--border);margin:3px 0"></div>':'')+
+        '</div>'+
+        '<div style="padding-bottom:12px">'+
+          '<div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:2px">'+u.date+'</div>'+
+          '<div style="font-size:13px;line-height:1.5">'+u.text+'</div>'+
+        '</div></div>';
     });
-    body += `</div></div>`;
+    body+='</div></div>';
   }
   document.getElementById('mBody').innerHTML = body;
   document.getElementById('modalOverlay').classList.add('open');
 }
-window.closeModal = function(e) { if (e.target === document.getElementById('modalOverlay')) closeModalDirect(); }
-window.closeModalDirect = function() { document.getElementById('modalOverlay').classList.remove('open'); }
 
-// ── 최신 심의결과 뉴스 ──
-render();
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+doRender();
+</script>
 </body>
 </html>
