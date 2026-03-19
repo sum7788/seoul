@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -351,25 +351,25 @@ let currentDistrict = "all";
 let currentCategory = "all";
 let currentTab = "card";
 
-function setStatus(v, el) {
+window.setStatus = function(v, el) {
   currentStatus = v;
   document.querySelectorAll('[data-s]').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   render();
 }
-function setCategory(v, el) {
+window.setCategory = function(v, el) {
   currentCategory = v;
   document.querySelectorAll('[data-c]').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   render();
 }
-function setDistrict(v, el) {
+window.setDistrict = function(v, el) {
   currentDistrict = v;
   document.querySelectorAll('[data-d]').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   render();
 }
-function setTab(t, el) {
+window.setTab = function(t, el) {
   currentTab = t;
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
@@ -384,7 +384,7 @@ function setTab(t, el) {
 const STATUS_ORDER = { wip:0, demo:1, plan:2, done:3 };
 const DISTRICT_ORDER = { 'CBD시청':0,'CBD종로':1,'CBD을지로':2,'YBD':3,'마포':4,'용산':5,'한남':6,'흑석':7,'노량진':8,'강남':9,'성수':10,'기타':11 };
 
-function filtered() {
+window.filtered = function() {
   const q = document.getElementById('searchInput').value.toLowerCase();
   const sort = document.getElementById('sortSelect')?.value || 'default';
   let list = DATA.filter(d => {
@@ -404,18 +404,18 @@ function filtered() {
   return list;
 }
 
-function render() {
+window.render = function() {
   const list = filtered();
   document.getElementById('totalBadge').textContent = DATA.length + '건';
   document.getElementById('resultInfo').textContent = `${list.length}건 표시 중 (전체 ${DATA.length}건)`;
   renderCards(list);
 }
 
-function naverMapUrl(addr) {
+window.naverMapUrl = function(addr) {
   return 'https://map.naver.com/v5/search/' + encodeURIComponent(addr);
 }
 
-function renderCards(list) {
+window.renderCards = function(list) {
   const wrap = document.getElementById('cardView');
   if (!list.length) {
     wrap.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🔍</div><div>검색 결과가 없습니다</div></div>';
@@ -448,7 +448,7 @@ function renderCards(list) {
   `}).join('');
 }
 
-function openModal(id) {
+window.openModal = function(id) {
   const d = DATA.find(x => x.id === id);
   if (!d) return;
   document.getElementById('mName').textContent = d.name;
@@ -485,14 +485,14 @@ function openModal(id) {
   document.getElementById('mBody').innerHTML = body;
   document.getElementById('modalOverlay').classList.add('open');
 }
-function closeModal(e) { if (e.target === document.getElementById('modalOverlay')) closeModalDirect(); }
-function closeModalDirect() { document.getElementById('modalOverlay').classList.remove('open'); }
+window.closeModal = function(e) { if (e.target === document.getElementById('modalOverlay')) closeModalDirect(); }
+window.closeModalDirect = function() { document.getElementById('modalOverlay').classList.remove('open'); }
 
 // ── 최신 심의결과 뉴스 ──
 const NEWS_JSON_URL = 'https://raw.githubusercontent.com/sum7788/seoul/main/data/committee_results.json';
 let newsCache = null;
 
-async function loadNews() {
+async window.loadNews = function() {
   const wrap = document.getElementById('newsView');
   if (newsCache) { renderNews(newsCache); return; }
   wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3)">⏳ 심의결과 불러오는 중...</div>';
@@ -511,7 +511,7 @@ async function loadNews() {
   }
 }
 
-function renderNews(data) {
+window.renderNews = function(data) {
   const wrap = document.getElementById('newsView');
   if (!data.items || !data.items.length) {
     wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3)">아직 수집된 뉴스가 없어요</div>';
