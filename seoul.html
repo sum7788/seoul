@@ -156,7 +156,7 @@
 
 <div class="tabs">
   <div class="tab active" onclick="setTab('card',this)">카드 보기</div>
-  <div class="tab" onclick="setTab('news',this)">📋 최신 심의결과 <span id="newsBadge" style="display:none;background:#E24B4A;color:#fff;font-size:10px;padding:1px 5px;border-radius:99px;margin-left:4px;font-weight:700"></span></div>
+
   <div style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:0 8px">
     <span style="font-size:11px;color:var(--text3)">정렬</span>
     <select id="sortSelect" onchange="render()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-family:var(--font);cursor:pointer;outline:none">
@@ -171,7 +171,7 @@
 <div class="main">
   <div class="result-info" id="resultInfo"></div>
   <div id="cardView" class="cards"></div>
-  <div id="newsView" style="display:none;max-width:800px;margin:0 auto"></div>
+
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal" id="modalBox">
     <div class="modal-head">
@@ -373,11 +373,7 @@ window.setTab = function(t, el) {
   currentTab = t;
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('cardView').style.display = t === 'card' ? '' : 'none';
-  document.getElementById('newsView').style.display = t === 'news' ? '' : 'none';
-  document.getElementById('resultInfo').style.display = t === 'card' ? '' : 'none';
-  if (t === 'news') loadNews();
-  else render();
+  render();
 }
 
 
@@ -489,51 +485,6 @@ window.closeModal = function(e) { if (e.target === document.getElementById('moda
 window.closeModalDirect = function() { document.getElementById('modalOverlay').classList.remove('open'); }
 
 // ── 최신 심의결과 뉴스 ──
-const NEWS_JSON_URL = 'https://raw.githubusercontent.com/sum7788/seoul/main/data/committee_results.json';
-let newsCache = null;
-
-async window.loadNews = function() {
-  const wrap = document.getElementById('newsView');
-  if (newsCache) { renderNews(newsCache); return; }
-  wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3)">⏳ 심의결과 불러오는 중...</div>';
-  try {
-    const res = await fetch(NEWS_JSON_URL);
-    const data = await res.json();
-    newsCache = data;
-    if (data.items && data.items.length) {
-      const badge = document.getElementById('newsBadge');
-      badge.textContent = data.items.length;
-      badge.style.display = 'inline';
-    }
-    renderNews(data);
-  } catch(e) {
-    wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">📭</div><div>심의결과 데이터를 불러올 수 없어요</div></div>';
-  }
-}
-
-window.renderNews = function(data) {
-  const wrap = document.getElementById('newsView');
-  if (!data.items || !data.items.length) {
-    wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3)">아직 수집된 뉴스가 없어요</div>';
-    return;
-  }
-  const updatedStr = data.updated ? `<div style="font-size:11px;color:var(--text3);margin-bottom:16px">마지막 수집: ${data.updated} · 매주 월요일 자동 업데이트</div>` : '';
-  const items = data.items.map(item => `
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">
-        <a href="${item.url}" target="_blank" style="font-size:14px;font-weight:600;color:var(--text);text-decoration:none;line-height:1.4;flex:1">${item.title}</a>
-        <span style="font-size:11px;color:var(--text3);white-space:nowrap;flex-shrink:0">${item.date || item.collected_at || ''}</span>
-      </div>
-      ${item.summary ? `<div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:10px">${item.summary}</div>` : ''}
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <span style="font-size:11px;color:var(--text3);background:var(--bg);padding:2px 8px;border-radius:99px">${item.source || ''}</span>
-        <a href="${item.url}" target="_blank" style="font-size:11px;color:var(--accent);font-weight:600;text-decoration:none">원문 보기 →</a>
-      </div>
-    </div>
-  `).join('');
-  wrap.innerHTML = `<div style="margin-bottom:16px"><div style="font-size:18px;font-weight:700;margin-bottom:4px">📋 정비사업 통합심의 최신 결과</div>${updatedStr}</div>${items}`;
-}
-
 render();
 </body>
 </html>
